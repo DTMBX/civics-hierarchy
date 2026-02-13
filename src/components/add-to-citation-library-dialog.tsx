@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/lib/local-storage-kv'
 import { SavedCitation, CitationCollection, Section, Document, Jurisdiction } from '@/lib/types'
 import { TagManager } from '@/components/tag-manager'
 import { SmartTagSuggestions } from '@/components/smart-tag-suggestions'

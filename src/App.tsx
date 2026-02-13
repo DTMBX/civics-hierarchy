@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/lib/local-storage-kv'
 import { Warning } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/header'

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/lib/local-storage-kv'
 import { SavedCitation, CitationCollection, Section, Document } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

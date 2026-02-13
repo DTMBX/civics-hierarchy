@@ -2,7 +2,10 @@ import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from "react-error-boundary";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
-import "@github/spark/spark"
+import { installSparkShim } from '@/lib/local-storage-kv'
+
+// Install localStorage shim BEFORE any component renders
+installSparkShim()
 
 import App from './App.tsx'
 import { ErrorFallback } from './ErrorFallback.tsx'
