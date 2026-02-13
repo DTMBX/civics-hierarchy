@@ -48,18 +48,19 @@ export function Header({
       {/* Thin flag-stripe accent bar */}
       <div className="h-[3px] bg-gradient-to-r from-destructive via-accent to-primary" />
 
-      <div className="flex items-center justify-between px-4 py-2.5 md:px-6">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 px-3 py-2 md:px-5">
+        {/* Left: Logo + Nav */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
-            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 hover:opacity-90 transition-opacity shrink-0"
             onClick={() => onNavigate?.('home')}
           >
-            <Shield size={28} weight="fill" className="text-accent shrink-0" />
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight font-serif text-primary-foreground leading-none">
+            <Shield size={26} weight="fill" className="text-accent" />
+            <div className="leading-none">
+              <h1 className="text-lg md:text-xl font-bold tracking-tight font-serif text-primary-foreground">
                 Civics Stack
               </h1>
-              <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-primary-foreground/60 font-sans font-medium">
+              <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-primary-foreground/60 font-sans font-medium mt-px">
                 We the People
               </span>
             </div>
@@ -67,7 +68,7 @@ export function Header({
 
           {/* Desktop nav links */}
           {onNavigate && (
-            <nav className="hidden md:flex items-center gap-0.5 ml-3" aria-label="Quick links">
+            <nav className="hidden lg:flex items-center ml-2" aria-label="Quick links">
               {desktopNavItems.map(item => {
                 const Icon = item.icon
                 const isActive = activeRoute === item.id
@@ -77,12 +78,12 @@ export function Header({
                     variant="ghost"
                     size="sm"
                     className={cn(
-                      'gap-1.5 text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10',
+                      'gap-1 px-2.5 h-8 text-[13px] text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10 rounded-md',
                       isActive && 'text-accent font-semibold bg-white/10'
                     )}
                     onClick={() => onNavigate(item.id)}
                   >
-                    <Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                    <Icon size={15} weight={isActive ? 'fill' : 'regular'} />
                     {item.label}
                   </Button>
                 )
@@ -91,15 +92,16 @@ export function Header({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right: Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <Select
             value={selectedJurisdiction?.id}
             onValueChange={onJurisdictionChange}
           >
-            <SelectTrigger className="w-[130px] md:w-[200px] bg-white/10 border-white/20 text-primary-foreground text-sm">
-              <div className="flex items-center gap-2">
-                <MapPin size={16} />
-                <SelectValue placeholder="Select jurisdiction" />
+            <SelectTrigger className="w-[120px] md:w-[180px] h-8 bg-white/10 border-white/20 text-primary-foreground text-xs md:text-sm">
+              <div className="flex items-center gap-1.5 truncate">
+                <MapPin size={14} className="shrink-0" />
+                <SelectValue placeholder="Jurisdiction" />
               </div>
             </SelectTrigger>
             <SelectContent>
@@ -114,16 +116,16 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="text-primary-foreground/70 hover:text-accent hover:bg-white/10"
+            className="h-8 w-8 text-primary-foreground/70 hover:text-accent hover:bg-white/10"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label="Toggle dark mode"
           >
-            <Sun size={20} className="block dark:hidden" />
-            <Moon size={20} className="hidden dark:block" />
+            <Sun size={18} className="block dark:hidden" />
+            <Moon size={18} className="hidden dark:block" />
           </Button>
 
-          <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10" onClick={onSettingsClick}>
-            <Gear size={20} />
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10" onClick={onSettingsClick}>
+            <Gear size={18} />
           </Button>
         </div>
       </div>

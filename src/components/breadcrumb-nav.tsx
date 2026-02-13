@@ -17,7 +17,7 @@ export function BreadcrumbNav({ items, onNavigate }: BreadcrumbNavProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center gap-1 text-sm text-muted-foreground py-2 px-1 overflow-x-auto"
+      className="flex items-center gap-1 text-xs text-muted-foreground py-1.5 overflow-x-auto scrollbar-none"
     >
       <button
         onClick={() => onNavigate('home')}

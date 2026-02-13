@@ -41,9 +41,9 @@ export function HomeView({
   }
 
   return (
-    <div className="space-y-8">
-      {/* ── Hero Section ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary to-[oklch(0.35_0.07_250)] dark:from-[oklch(0.14_0.025_255)] dark:via-[oklch(0.18_0.03_252)] dark:to-[oklch(0.22_0.04_250)] px-6 py-10 md:py-14 shadow-lg">
+    <div className="space-y-6">
+      {/* ── Hero Section ───────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary to-[oklch(0.35_0.07_250)] dark:from-[oklch(0.14_0.025_255)] dark:via-[oklch(0.18_0.03_252)] dark:to-[oklch(0.22_0.04_250)] px-5 py-8 md:px-8 md:py-12 shadow-lg">
         {/* Decorative stars */}
         <div className="absolute top-4 right-6 flex gap-1.5 opacity-20">
           <Star size={14} weight="fill" className="text-accent" />
@@ -62,29 +62,29 @@ export function HomeView({
               Constitutional Research Platform
             </span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-serif text-primary-foreground leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight font-serif text-primary-foreground leading-tight">
             Understand the
             <span className="block text-accent">Hierarchy of Law</span>
           </h2>
-          <p className="text-primary-foreground/70 mt-3 text-base md:text-lg max-w-lg">
+          <p className="text-primary-foreground/70 mt-2 text-sm md:text-base max-w-lg leading-relaxed">
             Explore every layer of American law — from the U.S. Constitution to local ordinances — with primary sources and live legal data.
           </p>
 
-          <div className="flex gap-2 mt-6">
+          <div className="flex gap-2 mt-5">
             <div className="relative flex-1 max-w-md">
               <MagnifyingGlass
-                size={20}
+                size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 placeholder="Search amendments, statutes, case law..."
-                className="pl-10 bg-white/95 dark:bg-white/10 border-white/30 text-foreground dark:text-primary-foreground placeholder:text-muted-foreground"
+                className="pl-9 h-9 bg-white/95 dark:bg-white/10 border-white/30 text-foreground dark:text-primary-foreground placeholder:text-muted-foreground text-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
-            <Button onClick={handleSearch} className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-sm">
+            <Button onClick={handleSearch} size="sm" className="h-9 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-sm px-5">
               Search
             </Button>
           </div>
@@ -109,38 +109,38 @@ export function HomeView({
       )}
 
       {/* ── Stats strip ────────────────────────────────────────────── */}
-      <section className="grid md:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-primary/70 dark:text-primary/80">Database Size</CardDescription>
-            <CardTitle className="text-3xl font-bold font-serif text-primary dark:text-primary">50+ States</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-[10px] uppercase tracking-wider font-semibold text-primary/70 dark:text-primary/80">Database Size</CardDescription>
+            <CardTitle className="text-2xl font-bold font-serif text-primary dark:text-primary">50+ States</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="px-4 pb-4 pt-0">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               All 50 state constitutions plus 6 territories
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-destructive shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-destructive/70 dark:text-destructive/80">Federal Sources</CardDescription>
-            <CardTitle className="text-3xl font-bold font-serif">Statutes & Treaties</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-[10px] uppercase tracking-wider font-semibold text-destructive/70 dark:text-destructive/80">Federal Sources</CardDescription>
+            <CardTitle className="text-2xl font-bold font-serif">Statutes & Treaties</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="px-4 pb-4 pt-0">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               U.S. Code, federal laws, and international treaties
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-accent shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-accent-foreground/70 dark:text-accent/80">Full-Text Search</CardDescription>
-            <CardTitle className="text-3xl font-bold font-serif">Advanced</CardTitle>
+          <CardHeader className="p-4 pb-2">
+            <CardDescription className="text-[10px] uppercase tracking-wider font-semibold text-accent-foreground/70 dark:text-accent/80">Full-Text Search</CardDescription>
+            <CardTitle className="text-2xl font-bold font-serif">Advanced</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="px-4 pb-4 pt-0">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Search across all documents with filters
             </p>
           </CardContent>
@@ -148,7 +148,7 @@ export function HomeView({
       </section>
 
       {/* ── Core Features ─────────────────────────────────────────── */}
-      <section className="grid md:grid-cols-2 gap-4">
+      <section className="grid sm:grid-cols-2 gap-3">
         <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-primary/10" onClick={onNavigateToLibrary}>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -183,13 +183,13 @@ export function HomeView({
       </section>
 
       {/* ── Live Legal Data APIs ────────────────────────────────── */}
-      <section className="space-y-3">
-        <h3 className="text-lg font-semibold font-serif flex items-center gap-2">
-          <Scales size={20} className="text-primary dark:text-accent" weight="duotone" />
+      <section className="space-y-2.5">
+        <h3 className="text-base font-semibold font-serif flex items-center gap-2">
+          <Scales size={18} className="text-primary dark:text-accent" weight="duotone" />
           Live Legal Data
-          <span className="ml-1 text-[10px] uppercase tracking-wider bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive px-2 py-0.5 rounded-full font-sans font-semibold">Live</span>
+          <span className="ml-1 text-[9px] uppercase tracking-wider bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive px-1.5 py-0.5 rounded-full font-sans font-semibold">Live</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {onNavigateToCaseLaw && (
             <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-primary/20 dark:border-primary/30" onClick={onNavigateToCaseLaw}>
               <CardContent className="flex items-center gap-3 p-4">

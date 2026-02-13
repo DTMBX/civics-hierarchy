@@ -290,7 +290,7 @@ function App() {
         onNavigate={(route) => navigate(route)}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         {/* Desktop Hierarchy Sidebar */}
         <HierarchyLadder
           documents={documents}
@@ -303,10 +303,10 @@ function App() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto flex flex-col">
           {/* Breadcrumb Trail */}
           {breadcrumbs.length > 0 && (
-            <div className="px-4 md:px-8 pt-2 max-w-7xl mx-auto">
+            <div className="px-4 md:px-6 lg:px-8 pt-2 max-w-7xl mx-auto w-full">
               <BreadcrumbNav
                 items={breadcrumbs}
                 onNavigate={(route, routeParams) =>
@@ -316,7 +316,7 @@ function App() {
             </div>
           )}
 
-          <div className="px-4 py-6 md:px-8 pb-24 md:pb-8 max-w-7xl mx-auto">
+          <div className="flex-1 px-4 py-5 md:px-6 lg:px-8 pb-20 md:pb-6 max-w-7xl mx-auto w-full">
             <Suspense fallback={<ViewLoader />}>
             {currentRoute === 'home' && (
               <HomeView
