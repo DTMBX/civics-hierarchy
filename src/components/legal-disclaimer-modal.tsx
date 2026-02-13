@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -117,17 +116,8 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
   if (!open) return null
 
   return (
-    <DialogPrimitive.Root open={open}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
-          onPointerDownOutside={e => e.preventDefault()}
-          onEscapeKeyDown={e => e.preventDefault()}
-          onInteractOutside={e => e.preventDefault()}
-          aria-describedby="disclaimer-desc"
-        >
-          <div className="bg-background border rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: 'min(92vh, 720px)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-6">
+      <div className="bg-background border rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: 'min(92vh, 720px)' }}>
             {/* ── Header ──────────────────────────────────────────── */}
             <div className="px-5 pt-5 pb-4 border-b bg-card shrink-0">
               <div className="flex items-start gap-3">
@@ -135,9 +125,9 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
                   <Warning className="w-5 h-5 text-amber-600 dark:text-amber-400" weight="fill" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <DialogPrimitive.Title className="text-lg sm:text-xl font-serif font-semibold tracking-tight">
+                  <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight">
                     Important Legal Information
-                  </DialogPrimitive.Title>
+                  </h2>
                   <p id="disclaimer-desc" className="text-sm text-muted-foreground mt-0.5">
                     Please review each disclosure before continuing
                   </p>
@@ -299,8 +289,6 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
               )}
             </div>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        </div>
   )
 }
