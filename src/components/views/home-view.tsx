@@ -79,6 +79,44 @@ export function HomeView({
         </Card>
       )}
 
+      <section className="grid md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription className="text-xs uppercase tracking-wide">Database Size</CardDescription>
+            <CardTitle className="text-3xl font-bold">50+ States</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              All 50 state constitutions plus 6 territories
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription className="text-xs uppercase tracking-wide">Federal Sources</CardDescription>
+            <CardTitle className="text-3xl font-bold">Statutes & Treaties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              U.S. Code, federal laws, and international treaties
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription className="text-xs uppercase tracking-wide">Full-Text Search</CardDescription>
+            <CardTitle className="text-3xl font-bold">Advanced</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Search across all documents with filters
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="grid md:grid-cols-2 gap-4">
         <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={onNavigateToLibrary}>
           <CardHeader>
@@ -89,7 +127,7 @@ export function HomeView({
               <div>
                 <CardTitle className="text-lg">Constitutional Library</CardTitle>
                 <CardDescription>
-                  Browse U.S. Constitution and state documents
+                  Browse U.S. Constitution, state documents, and federal statutes
                 </CardDescription>
               </div>
             </div>

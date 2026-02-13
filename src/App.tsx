@@ -8,6 +8,7 @@ import { LibraryView } from '@/components/views/library-view'
 import { SearchView } from '@/components/views/search-view'
 import { AnalyzerView } from '@/components/views/analyzer-view'
 import { LearnView } from '@/components/views/learn-view'
+import { LocalOrdinanceSubmission } from '@/components/local-ordinance-submission'
 import { SectionDetail } from '@/components/section-detail'
 import { jurisdictions, documents, sections } from '@/lib/seed-data'
 import { Section, Bookmark, UserSettings } from '@/lib/types'
@@ -148,6 +149,10 @@ function App() {
             documents={documents}
             onSectionSelect={handleSectionSelect}
           />
+        )}
+
+        {activeTab === 'contribute' && (
+          <LocalOrdinanceSubmission />
         )}
       </main>
 

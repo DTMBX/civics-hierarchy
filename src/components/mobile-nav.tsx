@@ -1,7 +1,7 @@
-import { House, Books, MagnifyingGlass, ChartBar, GraduationCap } from '@phosphor-icons/react'
+import { House, Books, MagnifyingGlass, ChartBar, GraduationCap, Upload } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
-export type TabId = 'home' | 'library' | 'search' | 'analyzer' | 'learn'
+export type TabId = 'home' | 'library' | 'search' | 'analyzer' | 'learn' | 'contribute'
 
 interface MobileNavProps {
   activeTab: TabId
@@ -14,7 +14,8 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
     { id: 'library' as TabId, label: 'Library', icon: Books },
     { id: 'search' as TabId, label: 'Search', icon: MagnifyingGlass },
     { id: 'analyzer' as TabId, label: 'Analyzer', icon: ChartBar },
-    { id: 'learn' as TabId, label: 'Learn', icon: GraduationCap }
+    { id: 'learn' as TabId, label: 'Learn', icon: GraduationCap },
+    { id: 'contribute' as TabId, label: 'Contribute', icon: Upload }
   ]
 
   return (

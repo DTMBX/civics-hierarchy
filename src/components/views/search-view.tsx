@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MagnifyingGlass, Funnel } from '@phosphor-icons/react'
-import { Section, Document, AuthorityLevel } from '@/lib/types'
+import { Section, Document, AuthorityLevel, DocumentType } from '@/lib/types'
 import { AuthorityBadge } from '../authority-badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { FullTextSearchEngine } from '@/lib/search-engine'
 
 interface SearchViewProps {
   documents: Document[]
@@ -18,41 +19,36 @@ interface SearchViewProps {
 
 export function SearchView({ documents, sections, onSectionSelect }: SearchViewProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<{ section: Section; document: Document }[]>([])
+  const [results, setResults] = useState<{ section: Section; document: Document; snippet: string }[]>([])
   const [hasSearched, setHasSearched] = useState(false)
   const [filters, setFilters] = useState<{
     authorityLevels: AuthorityLevel[]
+    documentTypes: DocumentType[]
   }>({
-    authorityLevels: []
+    authorityLevels: [],
+    documentTypes: []
   })
+
+  const searchEngine = useMemo(
+    () => new FullTextSearchEngine(sections, documents),
+    [sections, documents]
+  )
 
   const handleSearch = () => {
     if (!query.trim()) return
 
-    const searchTerm = query.toLowerCase()
-    const filtered = sections.filter(section => {
-      const doc = documents.find(d => d.id === section.documentId)
-      if (!doc) return false
+    const searchResults = searchEngine.search(query, {
+      authorityLevels: filters.authorityLevels.length > 0 ? filters.authorityLevels : undefined,
+      documentTypes: filters.documentTypes.length > 0 ? filters.documentTypes : undefined
+    }, 100)
 
-      if (filters.authorityLevels.length > 0) {
-        if (!filters.authorityLevels.includes(doc.authorityLevel)) {
-          return false
-        }
-      }
-
-      return (
-        section.title.toLowerCase().includes(searchTerm) ||
-        section.text.toLowerCase().includes(searchTerm) ||
-        section.canonicalCitation.toLowerCase().includes(searchTerm)
-      )
-    })
-
-    const resultsWithDocs = filtered.map(section => ({
-      section,
-      document: documents.find(d => d.id === section.documentId)!
+    const resultsWithSnippets = searchResults.map(result => ({
+      section: result.section,
+      document: result.document,
+      snippet: result.matchedText
     }))
 
-    setResults(resultsWithDocs)
+    setResults(resultsWithSnippets)
     setHasSearched(true)
   }
 
@@ -65,26 +61,30 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
     }))
   }
 
-  const getSnippet = (text: string, query: string) => {
-    const lowerText = text.toLowerCase()
-    const lowerQuery = query.toLowerCase()
-    const index = lowerText.indexOf(lowerQuery)
-    
-    if (index === -1) return text.slice(0, 150) + '...'
-    
-    const start = Math.max(0, index - 50)
-    const end = Math.min(text.length, index + query.length + 100)
-    const snippet = text.slice(start, end)
-    
-    return (start > 0 ? '...' : '') + snippet + (end < text.length ? '...' : '')
+  const toggleDocumentTypeFilter = (type: DocumentType) => {
+    setFilters(prev => ({
+      ...prev,
+      documentTypes: prev.documentTypes.includes(type)
+        ? prev.documentTypes.filter(t => t !== type)
+        : [...prev.documentTypes, type]
+    }))
   }
+
+  const clearFilters = () => {
+    setFilters({
+      authorityLevels: [],
+      documentTypes: []
+    })
+  }
+
+  const activeFilterCount = filters.authorityLevels.length + filters.documentTypes.length
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Search Legal Sources</h2>
+        <h2 className="text-3xl font-bold tracking-tight font-serif">Search Legal Sources</h2>
         <p className="text-muted-foreground mt-1">
-          Search across constitutional documents and statutes
+          Full-text search across all 50 states, territories, federal statutes, and treaties
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
-            placeholder="Search for provisions, amendments, clauses..."
+            placeholder="Search for provisions, amendments, clauses, statutes..."
             className="pl-10"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -104,8 +104,13 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="relative">
               <Funnel size={20} />
+              {activeFilterCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {activeFilterCount}
+                </Badge>
+              )}
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -130,23 +135,57 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
                   ))}
                 </div>
               </div>
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Document Type</Label>
+                <div className="space-y-2">
+                  {(['constitution', 'statute', 'treaty', 'regulation', 'ordinance'] as DocumentType[]).map(type => (
+                    <div key={type} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`filter-type-${type}`}
+                        checked={filters.documentTypes.includes(type)}
+                        onCheckedChange={() => toggleDocumentTypeFilter(type)}
+                      />
+                      <Label htmlFor={`filter-type-${type}`} className="capitalize cursor-pointer">
+                        {type}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {activeFilterCount > 0 && (
+                <Button variant="outline" className="w-full" onClick={clearFilters}>
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           </SheetContent>
         </Sheet>
         <Button onClick={handleSearch}>Search</Button>
       </div>
 
-      {filters.authorityLevels.length > 0 && (
+      {activeFilterCount > 0 && (
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-muted-foreground">Filters:</span>
+          <span className="text-sm text-muted-foreground">Active filters:</span>
           {filters.authorityLevels.map(level => (
             <Badge
               key={level}
               variant="secondary"
-              className="cursor-pointer"
+              className="cursor-pointer capitalize"
               onClick={() => toggleAuthorityFilter(level)}
             >
               {level} ×
+            </Badge>
+          ))}
+          {filters.documentTypes.map(type => (
+            <Badge
+              key={type}
+              variant="secondary"
+              className="cursor-pointer capitalize"
+              onClick={() => toggleDocumentTypeFilter(type)}
+            >
+              {type} ×
             </Badge>
           ))}
         </div>
@@ -170,7 +209,7 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
             </Card>
           ) : (
             <div className="space-y-3">
-              {results.map(({ section, document }) => (
+              {results.map(({ section, document, snippet }) => (
                 <Card
                   key={section.id}
                   className="cursor-pointer transition-shadow hover:shadow-md"
@@ -189,7 +228,7 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
                       <AuthorityBadge level={document.authorityLevel} />
                     </div>
                     <p className="text-sm font-serif leading-relaxed border-l-2 border-primary/30 pl-3">
-                      {getSnippet(section.text, query)}
+                      {snippet}
                     </p>
                     <p className="text-xs text-muted-foreground font-medium">
                       {section.canonicalCitation}
@@ -205,9 +244,11 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
       {!hasSearched && (
         <Card className="bg-muted/30">
           <CardContent className="py-12 text-center space-y-2">
-            <MagnifyingGlass size={48} className="mx-auto text-muted-foreground" />
-            <p className="text-muted-foreground">
-              Enter a search term to find relevant constitutional provisions and statutes
+            <MagnifyingGlass size={48} className="mx-auto text-muted-foreground" weight="thin" />
+            <p className="text-lg font-semibold">Full-Text Search</p>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Search across the U.S. Constitution, all 50 state constitutions, territories, 
+              federal statutes, and international treaties
             </p>
           </CardContent>
         </Card>
