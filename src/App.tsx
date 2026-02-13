@@ -1,13 +1,10 @@
 import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react'
 import { useKV } from '@/lib/local-storage-kv'
-import { Warning } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/header'
 import { MobileNav } from '@/components/mobile-nav'
 import { SectionDetail } from '@/components/section-detail'
-import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
-import { StickyDisclaimer } from '@/components/disclaimer-banner'
-import { DisclaimerViewer } from '@/components/disclaimer-viewer'
+import { SiteFooter } from '@/components/site-footer'
 import { HierarchyLadder } from '@/components/hierarchy-ladder'
 import { BreadcrumbNav } from '@/components/breadcrumb-nav'
 import { SupremeOverlay } from '@/components/supreme-overlay'
@@ -21,7 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { hasAcknowledgedRequiredDisclaimers, createAuditLog } from '@/lib/compliance'
+import { createAuditLog } from '@/lib/compliance'
 
 // ── Lazy-loaded views (code-split per route) ────────────────────────────
 const HomeView = lazy(() => import('@/components/views/home-view').then(m => ({ default: m.HomeView })))
@@ -53,11 +50,7 @@ function App() {
   const [selectedSection, setSelectedSection] = useState<Section | null>(null)
   const [showSectionDetail, setShowSectionDetail] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
-  const [disclaimersAccepted, setDisclaimersAccepted] = useState(false)
   const [userId, setUserId] = useState<string>('')
-  const [showStickyDisclaimer, setShowStickyDisclaimer] = useState(false)
-  const [showDisclaimerViewer, setShowDisclaimerViewer] = useState(false)
   const [showSupremeOverlay, setShowSupremeOverlay] = useState(false)
   const [overlaySection, setOverlaySection] = useState<Section | null>(null)
 
@@ -104,8 +97,6 @@ function App() {
     }
   }, [currentRoute, params])
 
-  const [initFailed, setInitFailed] = useState(false)
-
   // ── App Initialization ─────────────────────────────────────────────────
   useEffect(() => {
     const initializeApp = async () => {
@@ -113,13 +104,6 @@ function App() {
         const user = await window.spark.user()
         const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
         setUserId(userIdentifier)
-
-        const hasAccepted = await hasAcknowledgedRequiredDisclaimers(userIdentifier)
-        setDisclaimersAccepted(hasAccepted)
-        
-        if (!hasAccepted) {
-          setShowDisclaimerModal(true)
-        }
 
         // Initialize source registry on first load
         await initializeSourceRegistry()
@@ -134,24 +118,12 @@ function App() {
         })
       } catch (err) {
         console.error('App initialization error:', err)
-        // Even if init fails, let user proceed through disclaimers
         setUserId(`anonymous-${Date.now()}`)
-        setInitFailed(true)
-        setShowDisclaimerModal(true)
       }
     }
 
     initializeApp()
   }, [])
-
-  // ── Sticky Disclaimer for Analyzer ─────────────────────────────────────
-  useEffect(() => {
-    if (currentRoute === 'analyzer' && disclaimersAccepted) {
-      setShowStickyDisclaimer(true)
-    } else {
-      setShowStickyDisclaimer(false)
-    }
-  }, [currentRoute, disclaimersAccepted])
 
   // ── Document title per route ───────────────────────────────────────────
   useEffect(() => {
@@ -305,57 +277,6 @@ function App() {
   const selectedDocument = selectedSection
     ? documents.find(d => d.id === selectedSection.documentId)
     : undefined
-
-  const handleDisclaimersAccepted = () => {
-    setDisclaimersAccepted(true)
-    setShowDisclaimerModal(false)
-    toast.success('Welcome to Civics Stack', {
-      description: 'You can now explore legal hierarchies and constitutional text.',
-    })
-  }
-
-  // ── Pre-Auth Gate ──────────────────────────────────────────────────────
-  if (!disclaimersAccepted) {
-    return (
-      <>
-        <LegalDisclaimerModal
-          open={showDisclaimerModal}
-          onAccept={handleDisclaimersAccepted}
-          userId={userId}
-        />
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <div className="text-center space-y-4 max-w-md">
-            <div className="flex items-center justify-center w-14 h-14 bg-primary/10 dark:bg-primary/20 rounded-xl mx-auto">
-              <Warning className="w-7 h-7 text-primary dark:text-accent" weight="fill" />
-            </div>
-            <h1 className="text-xl font-serif font-semibold">Civics Stack</h1>
-            {!showDisclaimerModal ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  {initFailed
-                    ? 'There was a problem loading. You can still continue.'
-                    : 'Loading application…'}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowDisclaimerModal(true)}
-                  className="mt-2"
-                >
-                  Review Legal Disclaimers
-                </Button>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Please review and accept the legal disclaimers to continue.
-              </p>
-            )}
-          </div>
-        </div>
-        <Toaster position="top-center" />
-      </>
-    )
-  }
 
   // ── Main Layout ────────────────────────────────────────────────────────
   return (
@@ -524,6 +445,9 @@ function App() {
             )}
             </Suspense>
           </div>
+
+          {/* Strict Footer Terms & Conditions */}
+          <SiteFooter userId={userId} />
         </main>
       </div>
 
@@ -591,17 +515,9 @@ function App() {
               <p className="text-sm text-muted-foreground">
                 View, export, or print all legal disclaimers for your records
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowDisclaimerViewer(true)
-                  setShowSettings(false)
-                }}
-                className="w-full"
-              >
-                View & Export Disclaimers
-              </Button>
+              <p className="text-xs text-muted-foreground/70">
+                Full terms are always visible in the site footer below.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -623,18 +539,7 @@ function App() {
         </DialogContent>
       </Dialog>
 
-      <DisclaimerViewer
-        open={showDisclaimerViewer}
-        onOpenChange={setShowDisclaimerViewer}
-        userId={userId}
-      />
-
       <Toaster position="top-center" />
-      <StickyDisclaimer 
-        show={showStickyDisclaimer} 
-        variant="legal-advice"
-        onExport={() => setShowDisclaimerViewer(true)}
-      />
     </div>
   )
 }

@@ -107,25 +107,3 @@ export function DisclaimerBanner({
     </div>
   )
 }
-
-interface StickyDisclaimerProps {
-  show: boolean
-  variant?: 'legal-advice' | 'verify-sources' | 'court-use' | 'educational'
-  onExport?: () => void
-}
-
-export function StickyDisclaimer({ show, variant = 'legal-advice', onExport }: StickyDisclaimerProps) {
-  if (!show) return null
-
-  return (
-    <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-lg z-40 animate-in slide-in-from-bottom-5 duration-300 drop-shadow-lg">
-      <DisclaimerBanner
-        variant={variant}
-        showIcon
-        dismissible={false}
-        showExport
-        onExport={onExport}
-      />
-    </div>
-  )
-}
