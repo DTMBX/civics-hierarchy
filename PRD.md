@@ -55,11 +55,18 @@ This is a sophisticated educational platform requiring multi-jurisdictional docu
 - **Success criteria**: Every local law item displays verification status badge; unverified items require explicit warning; audit log tracks all additions
 
 ### Citation & Export Tools
-- **Functionality**: Generate shareable citation cards, export text with citations, deep links to specific sections/clauses
-- **Purpose**: Enable reliable sourcing for journalists, educators, advocates
-- **Trigger**: From any document section → "Cite" button
-- **Progression**: Select citation format (Bluebook-style, URL, plain text) → copy to clipboard or share link → recipient can jump directly to cited provision
-- **Success criteria**: Citations match canonical format; deep links open correct section; shareable cards include authority level and effective date
+- **Functionality**: Generate court-defensible citations in multiple formats (Bluebook, ALWD, APA, MLA, Chicago, BibTeX, Plain Text, Court Filing) with complete verification metadata, audit trails, and export to multiple file formats (TXT, MD, HTML, JSON, CSV, BibTeX)
+- **Purpose**: Enable reliable, court-defensible sourcing for journalists, educators, advocates, researchers, and legal professionals with full traceability and verification standards
+- **Trigger**: From any document section → "Export Citation" button or quick export dropdown
+- **Progression**: Select citation style (Bluebook/ALWD/APA/MLA/Chicago/Court Filing/BibTeX/Plain/JSON) → choose export format (TXT/MD/HTML/JSON/CSV/BibTeX) → configure options (include full text, metadata, verification chain, audit trail, disclaimers) → preview citation → export to file or copy to clipboard → system generates immutable audit log entry → recipient receives properly formatted citation with verification metadata
+- **Success criteria**: Citations match canonical legal citation formats; all exports include verification status, source URLs, last-verified dates, and audit trail IDs; disclaimers clearly state educational purpose and requirement to cite official sources for court filings; batch export supports multiple citations in single file; quick export enables clipboard copy in common formats; all exports are traceable through audit logs
+
+### Batch Citation Export
+- **Functionality**: Export multiple citations simultaneously in a combined file with consistent formatting and complete verification metadata for all items
+- **Purpose**: Enable efficient citation management for research projects, briefs, articles, and educational materials requiring multiple legal references
+- **Trigger**: From bookmark lists, search results, or library views → "Batch Export" action
+- **Progression**: Select multiple sections/provisions → choose citation style and export format → configure options for all items → preview selection count → export combined file with table of contents → system logs batch export action
+- **Success criteria**: Batch exports maintain formatting consistency across all citations; combined files include master disclaimer and verification standards note; supports all major formats; preserves individual audit trail IDs for each citation; enables select/deselect all functionality
 
 ### Offline Reading Packs
 - **Functionality**: Download jurisdictional packs (e.g., "Federal + California + SF County") for offline reading and search

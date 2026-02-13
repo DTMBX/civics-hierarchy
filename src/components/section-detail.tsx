@@ -1,11 +1,12 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Section, Document } from '@/lib/types'
+import { Section, Document, Jurisdiction } from '@/lib/types'
 import { AuthorityBadge, VerificationBadge } from './authority-badge'
 import { SourceVerificationDisplay } from './source-verification-display'
 import { DisclaimerBanner } from './disclaimer-banner'
-import { BookmarkSimple, Copy, ShareNetwork, Check } from '@phosphor-icons/react'
+import { CitationExportDialog } from './citation-export-dialog'
+import { BookmarkSimple, Copy, ShareNetwork, Check, FileText } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { generateCourtDefensibleCitation } from '@/lib/compliance'
@@ -13,14 +14,17 @@ import { generateCourtDefensibleCitation } from '@/lib/compliance'
 interface SectionDetailProps {
   section: Section | null
   document?: Document
+  jurisdiction?: Jurisdiction
+  userId?: string
   open: boolean
   onClose: () => void
   onBookmark?: () => void
 }
 
-export function SectionDetail({ section, document, open, onClose, onBookmark }: SectionDetailProps) {
+export function SectionDetail({ section, document, jurisdiction, userId, open, onClose, onBookmark }: SectionDetailProps) {
   const [copied, setCopied] = useState(false)
   const [showVerificationDetail, setShowVerificationDetail] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   if (!section || !document) return null
 
@@ -107,6 +111,16 @@ export function SectionDetail({ section, document, open, onClose, onBookmark }: 
         </ScrollArea>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t bg-background">
+          <div className="flex gap-2 mb-2">
+            <Button 
+              onClick={() => setShowExportDialog(true)} 
+              variant="default" 
+              className="flex-1"
+            >
+              <FileText size={18} className="mr-2" />
+              Export Citation
+            </Button>
+          </div>
           <div className="flex gap-2">
             {onBookmark && (
               <Button onClick={onBookmark} variant="outline" className="flex-1">
@@ -123,6 +137,15 @@ export function SectionDetail({ section, document, open, onClose, onBookmark }: 
           </div>
         </div>
       </SheetContent>
+
+      <CitationExportDialog
+        open={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        section={section}
+        document={document}
+        jurisdiction={jurisdiction || null}
+        userId={userId || 'anonymous'}
+      />
     </Sheet>
   )
 }

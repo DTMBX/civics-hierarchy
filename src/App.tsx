@@ -256,6 +256,8 @@ function App() {
       <SectionDetail
         section={selectedSection}
         document={selectedDocument}
+        jurisdiction={selectedJurisdiction}
+        userId={userId}
         open={showSectionDetail}
         onClose={() => setShowSectionDetail(false)}
         onBookmark={handleBookmarkSection}
