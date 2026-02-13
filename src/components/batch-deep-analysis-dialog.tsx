@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react'
 import { TagDefinition } from '@/components/tag-manager'
-import { TagDefinition } from '@/components/tag-manager'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/compo
-import { Switch } fr
-import { ScrollArea } from '@/c
-import { Card, CardHeader, CardTitle, CardConte
-import { 
-  CheckCircle, 
-  Warning, 
-  Play,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { 
   Brain, 
   CheckCircle, 
@@ -25,20 +24,21 @@ import {
   Play,
   Pause,
   Stop,
-  ArrowRight,
   DownloadSimple,
   Tag
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { SavedCitation } from '@/lib/types'
+import { Document, Section } from '@/lib/types'
 
-  citationId: string
-  suggestedTags
-  reasoning?: string
-  practiceAreas: string[]
-  error?: string
-}
-interface LLMAnalysisResul
-  legalConcepts: string[]
+interface BatchDeepAnalysisDialogProps {
+  open: boolean
+  onClose: () => void
+  citations: SavedCitation[]
+  documents: Document[]
+  sections: Section[]
+  allTags: TagDefinition[]
+  onApplyTags: (citationId: string, tags: string[]) => void
 }
 
 interface AnalysisResult {
@@ -103,7 +103,7 @@ export function BatchDeepAnalysisDialog({
 
     if (skipAlreadyTagged && citation.tags.length >= 3) {
       return {
-      const contentToAnalyze = [
+        citationId: citation.id,
         status: 'skipped',
         suggestedTags: [],
         confidence: 'low',
@@ -116,124 +116,101 @@ export function BatchDeepAnalysisDialog({
     }
 
     try {
+      const section = sections.find(s => s.id === citation.sectionId)
+      const document = documents.find(d => d.id === citation.documentId)
+
+      const contentToAnalyze = [
+        `Title: ${citation.title}`,
+        `Citation: ${citation.canonicalCitation}`,
+        section ? `Content: ${section.text}` : '',
+        document ? `Document Type: ${document.type}` : '',
+        citation.notes ? `Notes: ${citation.notes}` : '',
+      ].filter(Boolean).join('\n')
+
+      const availableTagNames = allTags.map(t => t.name).join(', ')
+
+      const promptText = `You are a legal research assistant analyzing a legal citation. 
+
+CONTENT TO ANALYZE:
+${contentToAnalyze}
+
+AVAILABLE TAGS:
+${availableTagNames}
+
 ANALYSIS INSTRUCTIONS:
-2. Suggest 3-8 most relevant tags from the available tag list that are N
+1. Analyze the legal content for key concepts, practice areas, and constitutional issues
+2. Suggest 3-8 most relevant tags from the available tag list that are NOT already applied
+3. Identify legal concepts, practice areas, and constitutional issues
+4. Provide brief reasoning for your suggestions
+5. Assign a confidence level based on content clarity and relevance
 
-6. Assign a confidence level based
-Return your anal
-  "suggestedTags": ["Tag Name 1", 
-  "practiceAreas": ["area1"
-  "reasoning": "Brief explan
+Return your analysis as JSON with this structure:
+{
+  "suggestedTags": ["Tag Name 1", "Tag Name 2", ...],
+  "legalConcepts": ["concept1", "concept2", ...],
+  "practiceAreas": ["area1", "area2", ...],
+  "constitutionalIssues": ["issue1", "issue2", ...],
+  "reasoning": "Brief explanation of why these tags were suggested"
+}`
 
-      const llmResult = 
-      const newTags = llmRes
+      const llmResponse = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+      const llmResult: LLMAnalysisResult = JSON.parse(llmResponse)
+
+      const newTags = llmResult.suggestedTags.filter(
+        tag => !citation.tags.includes(tag)
       )
-      const confidence: 'high' | 'm
+
+      const confidence: 'high' | 'medium' | 'low' = 
+        newTags.length >= 5 && llmResult.reasoning.length > 50
           ? 'high'
+          : newTags.length >= 3
           ? 'medium'
+          : 'low'
 
-       
-
-        reasoning: llmResult.rea
-        practiceAreas: llmResult.pr
-        processingTime: Date.now() - startTime,
-    } catch (error) {
+      return {
         citationId: citation.id,
+        status: 'completed',
+        suggestedTags: newTags,
+        confidence,
+        reasoning: llmResult.reasoning,
+        legalConcepts: llmResult.legalConcepts,
+        practiceAreas: llmResult.practiceAreas,
+        constitutionalIssues: llmResult.constitutionalIssues,
+        processingTime: Date.now() - startTime,
+      }
+    } catch (error) {
+      return {
+        citationId: citation.id,
+        status: 'failed',
         suggestedTags: [],
-        reasoning: '',
+        legalConcepts: [],
         practiceAreas: [],
-        error: error instanceof Er
-
+        constitutionalIssues: [],
+        reasoning: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        processingTime: Date.now() - startTime,
+      }
+    }
   }
+
   const runBatchAnalysis = async () => {
-    setShowResults(
+    setIsRunning(true)
+    setShowResults(false)
+
+    const citationsToAnalyze = selectedCitationsList
 
     for (let i = 0; i < citationsToAnalyze.length; i++) {
-
-      }
-      const citatio
-
-        newMap.
-          
-
-          constitutionalIssues: [],
-
-      })
-      const result = await analyzeSingleCitation(citation)
-      setAnalysisResults(prev => {
-        newMap.set(citation.id, result)
-      })
-      if (autoApplyHighConfidence && result.confid
-      }
-
-
- 
-  }
-  const toggleAllCitations = () => {
-      setSelectedCitations(new Set())
-      setSelectedCitations(new Set(citations.ma
-  }
-  
-
-        newSet.delete(citationId)
-        newSet.add(citationId)
-
-  }
-  const applyTagsToCitation = (citationId: string, tags: string[]) => {
-    if 
-
-  }
-  const getStatusIcon = (result: AnalysisResult) => {
-      case 'comple
-      case 'failed':
-      case 'skipped'
-      default:
-
-
-    const resultsData = Array.fr
-      return {
-        status: result.status,
-        suggestedTa
-        practiceAreas: result.practiceA
-        reasoning: result.reasoning,
-      }
-
-    const dataBlob = new Blob([dataStr], { type
-    con
-    link.download = `
-    URL.revoke
-  }
-  return (
-      <DialogContent class
-          <DialogTitle cla
-            Deep Batch
-          <DialogDescripti
-          </DialogDescript
-
-          {!isRunning && !showResults ? (
-              <Card>
-       
-     
-   
-
-                      </p>
-    setIsRunning(true)
-                      onC
-    
-                  <div className="flex items-center justify-between">
-    
-                        Automatically apply tags with hig
       if (isPaused) {
         setIsRunning(false)
         return
-       
+      }
 
-                <CardHeader>
-      
-                      size="sm"
-                      onClick={toggl
-                      {selectedCi
-                  </CardTitle>
+      const citation = citationsToAnalyze[i]
+
+      setAnalysisResults(prev => {
+        const newMap = new Map(prev)
+        newMap.set(citation.id, {
+          citationId: citation.id,
           status: 'analyzing',
           suggestedTags: [],
           legalConcepts: [],
@@ -256,7 +233,7 @@ Return your anal
         onApplyTags(citation.id, [...citation.tags, ...result.suggestedTags])
       }
 
-      setCurrentIndex(currentIndex + i + 1)
+      setCurrentIndex(i + 1)
     }
 
     setIsRunning(false)
@@ -359,7 +336,7 @@ Return your anal
                       <p className="text-xs text-muted-foreground">
                         Skip citations that already have 3+ tags
                       </p>
-                          
+                    </div>
                     <Switch
                       checked={skipAlreadyTagged}
                       onCheckedChange={setSkipAlreadyTagged}
@@ -475,38 +452,41 @@ Return your anal
                       <CheckCircle className="w-4 h-4 text-green-600" />
                       Completed
                     </CardTitle>
-
+                  </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{completedCount}</div>
                   </CardContent>
+                </Card>
 
-
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-1">
                       <Warning className="w-4 h-4 text-yellow-600" />
-
+                      Skipped
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{skippedCount}</div>
                   </CardContent>
+                </Card>
 
-
+                <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-1">
                       <XCircle className="w-4 h-4 text-destructive" />
-
+                      Failed
                     </CardTitle>
-
-
+                  </CardHeader>
+                  <CardContent>
                     <div className="text-2xl font-bold">{failedCount}</div>
-
+                  </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm">Avg Time</CardTitle>
                   </CardHeader>
-
+                  <CardContent>
                     <div className="text-2xl font-bold">
                       {Array.from(analysisResults.values()).length > 0
                         ? Math.round(
@@ -517,7 +497,7 @@ Return your anal
                           )
                         : 0}s
                     </div>
-
+                  </CardContent>
                 </Card>
               </div>
 
@@ -528,7 +508,7 @@ Return your anal
                     if (!citation) return null
 
                     return (
-
+                      <Card key={citationId}>
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -538,9 +518,9 @@ Return your anal
                               </div>
                               <CardDescription className="text-xs mt-1">
                                 {citation.canonicalCitation}
-
+                              </CardDescription>
                             </div>
-
+                            {result.confidence && (
                               <Badge
                                 variant={
                                   result.confidence === 'high'
@@ -549,22 +529,22 @@ Return your anal
                                     ? 'secondary'
                                     : 'outline'
                                 }
-
+                              >
                                 {result.confidence} confidence
-
+                              </Badge>
                             )}
                           </div>
                         </CardHeader>
                         <CardContent>
                           {result.status === 'completed' && (
-
+                            <>
                               <div className="space-y-3">
                                 <div>
                                   <p className="text-xs font-medium mb-1">Suggested Tags:</p>
                                   <div className="flex flex-wrap gap-1">
                                     {result.suggestedTags.map(tag => (
                                       <Badge
-
+                                        key={tag}
                                         variant="outline"
                                         className="text-xs"
                                       >
@@ -612,32 +592,32 @@ Return your anal
                                     Apply Tags
                                   </Button>
                                 )}
-
+                              </div>
                             </>
                           )}
                           {result.status === 'skipped' && (
                             <p className="text-xs text-muted-foreground">{result.reasoning}</p>
                           )}
                           {result.status === 'failed' && (
-
+                            <p className="text-xs text-destructive">{result.error}</p>
                           )}
-
+                        </CardContent>
                       </Card>
-
+                    )
                   })}
-
+                </div>
               </ScrollArea>
             </>
           ) : null}
         </div>
 
-
+        <DialogFooter>
           {!showResults ? (
-
+            <>
               {!isRunning ? (
-
+                <>
                   <Button variant="outline" onClick={onClose}>
-
+                    Cancel
                   </Button>
                   <Button
                     onClick={runBatchAnalysis}
@@ -646,7 +626,7 @@ Return your anal
                     <Play className="w-4 h-4 mr-2" />
                     Start Analysis
                   </Button>
-
+                </>
               ) : (
                 <>
                   <Button
@@ -680,20 +660,20 @@ Return your anal
                   </Button>
                 </>
               )}
-
+            </>
           ) : (
-
+            <>
               <Button variant="outline" onClick={exportResults}>
                 <DownloadSimple className="w-4 h-4 mr-2" />
                 Export Results
-
+              </Button>
               <Button onClick={onClose}>
                 Close
               </Button>
-
+            </>
           )}
-
+        </DialogFooter>
       </DialogContent>
-
+    </Dialog>
   )
-
+}
