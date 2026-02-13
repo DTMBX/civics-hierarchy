@@ -7,8 +7,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Section, Document, AnalyzerSession, AnalyzerReport } from '@/lib/types'
-import { Warning, CheckCircle, ArrowRight, ArrowLeft } from '@phosphor-icons/react'
+import { Warning, CheckCircle, ArrowRight, ArrowLeft, Scales } from '@phosphor-icons/react'
 import { CitationCard } from '../citation-card'
+import { DisclaimerBanner } from '../disclaimer-banner'
+import { createAuditLog } from '@/lib/compliance'
 
 interface AnalyzerViewProps {
   documents: Document[]
@@ -81,7 +83,7 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
     }
   }
 
-  const generateReport = () => {
+  const generateReport = async () => {
     const relevantSections = sections.filter(s => 
       s.canonicalCitation.includes('U.S. Const. art. VI') ||
       s.canonicalCitation.includes('amend. X') ||
@@ -109,11 +111,26 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
         'File a public records request to obtain relevant documents',
         'Contact your elected representatives to express your views'
       ],
-      disclaimer: 'This analysis is for educational purposes only and does not constitute legal advice. The information provided helps you understand legal concepts and identify relevant sources, but should not be relied upon for legal decisions. Consult a qualified attorney for advice about your specific situation.'
+      disclaimer: 'THIS ANALYSIS IS FOR EDUCATIONAL PURPOSES ONLY AND DOES NOT CONSTITUTE LEGAL ADVICE. The information provided helps you understand legal concepts and identify relevant sources, but should not be relied upon for legal decisions. No attorney-client relationship is created. Consult a qualified attorney for advice about your specific situation. This tool does not render legal judgments or predict court outcomes.'
     }
 
     setReport(newReport)
     setStep(questions.length)
+
+    const user = await window.spark.user()
+    const userId = user?.login || String(user?.id || '') || 'anonymous'
+    
+    await createAuditLog({
+      userId,
+      userRole: 'reader',
+      action: 'create',
+      entityType: 'analyzer-report',
+      entityId: `report-${Date.now()}`,
+      metadata: { 
+        answers,
+        timestamp: new Date().toISOString()
+      },
+    })
   }
 
   const getPreemptionCategories = (answers: Record<string, string>) => {
@@ -153,17 +170,52 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Issue-Spotting Report</h2>
+          <h2 className="text-3xl font-bold tracking-tight font-serif">Issue-Spotting Report</h2>
           <p className="text-muted-foreground mt-1">
             Educational analysis of potential legal conflicts
           </p>
         </div>
 
-        <Alert variant="destructive">
-          <Warning size={20} />
-          <AlertTitle>Not Legal Advice</AlertTitle>
-          <AlertDescription>{report.disclaimer}</AlertDescription>
+        <DisclaimerBanner variant="legal-advice" showIcon={true} />
+
+        <Alert className="border-2 border-amber-500 bg-amber-50">
+          <Scales className="h-6 w-6 text-amber-700" weight="fill" />
+          <AlertTitle className="text-lg font-bold text-amber-900">
+            Critical: Not Legal Advice - Educational Tool Only
+          </AlertTitle>
+          <AlertDescription className="text-sm text-amber-900 leading-relaxed mt-2">
+            {report.disclaimer}
+          </AlertDescription>
         </Alert>
+
+        <Card className="border-2 border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="text-xl font-serif">Court-Defensible Usage Guidelines</CardTitle>
+            <CardDescription className="text-base">
+              How to use this educational report responsibly
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="space-y-2">
+              <p className="font-semibold">✓ Appropriate Uses:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
+                <li>Understanding legal concepts and hierarchies</li>
+                <li>Identifying relevant constitutional provisions to research further</li>
+                <li>Preparing questions for consultation with an attorney</li>
+                <li>Educational exploration of federalism and preemption</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="font-semibold">✗ Inappropriate Uses:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
+                <li>Making legal decisions without consulting an attorney</li>
+                <li>Citing this report in court filings or legal proceedings</li>
+                <li>Relying on this analysis as a legal opinion or verdict</li>
+                <li>Assuming this represents how a court would rule</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

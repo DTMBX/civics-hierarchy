@@ -70,10 +70,24 @@ This is a sophisticated educational platform requiring multi-jurisdictional docu
 
 ### Role-Based Access & Audit Logging
 - **Functionality**: Readers (default), Verified Contributors (submit local laws), Curators (approve sources, edit explanations), Admins (manage roles/features)
-- **Purpose**: Maintain accuracy and accountability for all editorial actions
+- **Purpose**: Maintain accuracy and accountability for all editorial actions; provide court-defensible audit trail
 - **Trigger**: User role assignment; all curator/admin actions
-- **Progression**: Curator edits explanation → system logs who, what, when → changes are versioned → admins can review audit trail and rollback
-- **Success criteria**: Every source edit is logged immutably; change history is viewable; rollback restores previous version
+- **Progression**: Curator edits explanation → system logs who, what, when with immutable timestamp → changes are versioned → admins can review audit trail and rollback → all logs retained for 7+ years
+- **Success criteria**: Every source edit is logged immutably; change history is viewable; rollback restores previous version; audit logs exportable for legal proceedings
+
+### Legal Disclaimer & Compliance System
+- **Functionality**: Multi-layered disclaimer system with required user acknowledgment, persistent banners, and court-defensible documentation
+- **Purpose**: Protect against unauthorized practice of law claims; establish educational purpose; create legal defensibility
+- **Trigger**: Application launch (first-time users); entering Analyzer tool; viewing legal content; exporting citations
+- **Progression**: User views comprehensive legal disclaimers → checks acknowledgment boxes for each required disclaimer (not legal advice, educational only, no attorney-client relationship, verify sources, accuracy limitations) → system logs acknowledgment with timestamp → disclaimers persist throughout application → sticky disclaimer appears during sensitive actions
+- **Success criteria**: All users acknowledge required disclaimers before access; acknowledgments logged in audit trail; disclaimers visible at all critical interaction points; court-defensible documentation generated
+
+### Source Verification & Provenance Display
+- **Functionality**: Three-tier verification status (Official/Verified/Unverified) with full provenance information and court-defensible citations
+- **Purpose**: Establish trustworthiness of sources; provide transparency; enable court-defensible usage
+- **Trigger**: Viewing any legal document or section; generating citations; curator review workflow
+- **Progression**: User views content → verification badge displayed prominently → can expand to see full provenance (official source URL, last checked date, verification method, curator notes) → can generate court-defensible citation with all metadata → warnings displayed for unverified content
+- **Success criteria**: Every document displays verification status; unverified content includes prominent warnings; citations include source URL and verification date; audit trail documents all verification actions
 
 ## Edge Case Handling
 
@@ -84,6 +98,9 @@ This is a sophisticated educational platform requiring multi-jurisdictional docu
 - **Misinformation or Safety Concerns**: "Report" flow captures issue type, sends to moderation queue, curator reviews and can hide/annotate/remove content with audit trail
 - **Offline Sync Conflicts**: Show user conflicting edits to notes/bookmarks; allow merge or keep local/remote version
 - **Inaccessible PDFs**: Warn uploaders about accessibility; provide OCR/text extraction tools; require alt-text for images
+- **Court Defensibility Challenges**: Comprehensive audit trail, source verification documentation, and disclaimer acknowledgments provide evidence of responsible operation
+- **Unauthorized Practice of Law Claims**: Multi-layered disclaimers, educational framing, and explicit no-attorney-client-relationship statements protect against such claims
+- **Data Breach or Security Incident**: Immediate containment, user notification within 72 hours, full incident documentation in audit log, and remediation with enhanced controls
 
 ## Design Direction
 

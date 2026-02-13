@@ -3,9 +3,12 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Section, Document } from '@/lib/types'
 import { AuthorityBadge, VerificationBadge } from './authority-badge'
+import { SourceVerificationDisplay } from './source-verification-display'
+import { DisclaimerBanner } from './disclaimer-banner'
 import { BookmarkSimple, Copy, ShareNetwork, Check } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { generateCourtDefensibleCitation } from '@/lib/compliance'
 
 interface SectionDetailProps {
   section: Section | null
@@ -17,6 +20,7 @@ interface SectionDetailProps {
 
 export function SectionDetail({ section, document, open, onClose, onBookmark }: SectionDetailProps) {
   const [copied, setCopied] = useState(false)
+  const [showVerificationDetail, setShowVerificationDetail] = useState(false)
 
   if (!section || !document) return null
 
@@ -26,6 +30,18 @@ export function SectionDetail({ section, document, open, onClose, onBookmark }: 
     setCopied(true)
     toast.success('Text copied to clipboard')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleGenerateCitation = async () => {
+    const citation = generateCourtDefensibleCitation(
+      document.title,
+      section.number,
+      section.canonicalCitation,
+      document.sourceUrl || 'Source URL not available',
+      document.lastChecked || new Date().toISOString()
+    )
+    await navigator.clipboard.writeText(citation)
+    toast.success('Court-defensible citation copied to clipboard')
   }
 
   const handleShare = async () => {
@@ -73,30 +89,20 @@ export function SectionDetail({ section, document, open, onClose, onBookmark }: 
 
         <ScrollArea className="h-[calc(100vh-280px)] mt-6 pr-4">
           <div className="space-y-6">
+            <DisclaimerBanner variant="verify-sources" showIcon={true} />
+
             <div className="font-serif text-base leading-relaxed whitespace-pre-line">
               {section.text}
             </div>
 
-            {document.sourceUrl && (
-              <div className="pt-4 border-t space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Official Source
-                </p>
-                <a
-                  href={document.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline block break-all"
-                >
-                  {document.sourceUrl}
-                </a>
-                {document.lastChecked && (
-                  <p className="text-xs text-muted-foreground">
-                    Last verified: {new Date(document.lastChecked).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-            )}
+            <SourceVerificationDisplay
+              verificationStatus={document.verificationStatus}
+              sourceUrl={document.sourceUrl}
+              lastChecked={document.lastChecked}
+              canonicalCitation={section.canonicalCitation}
+              documentTitle={document.title}
+              onGenerateCitation={handleGenerateCitation}
+            />
           </div>
         </ScrollArea>
 

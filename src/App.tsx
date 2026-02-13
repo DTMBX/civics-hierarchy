@@ -10,12 +10,15 @@ import { AnalyzerView } from '@/components/views/analyzer-view'
 import { LearnView } from '@/components/views/learn-view'
 import { LocalOrdinanceSubmission } from '@/components/local-ordinance-submission'
 import { SectionDetail } from '@/components/section-detail'
+import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
+import { StickyDisclaimer } from '@/components/disclaimer-banner'
 import { jurisdictions, documents, sections } from '@/lib/seed-data'
 import { Section, Bookmark, UserSettings } from '@/lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { hasAcknowledgedRequiredDisclaimers, createAuditLog } from '@/lib/compliance'
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home')
@@ -23,6 +26,10 @@ function App() {
   const [showSectionDetail, setShowSectionDetail] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
+  const [disclaimersAccepted, setDisclaimersAccepted] = useState(false)
+  const [userId, setUserId] = useState<string>('')
+  const [showStickyDisclaimer, setShowStickyDisclaimer] = useState(false)
 
   const [settings, setSettings] = useKV<UserSettings>('user-settings', {
     selectedJurisdictionId: 'us-ca',
@@ -35,6 +42,40 @@ function App() {
   const [bookmarks, setBookmarks] = useKV<Bookmark[]>('bookmarks', [])
 
   const selectedJurisdiction = jurisdictions.find(j => j.id === (settings?.selectedJurisdictionId || 'us-ca'))
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      const user = await window.spark.user()
+      const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
+      setUserId(userIdentifier)
+
+      const hasAccepted = await hasAcknowledgedRequiredDisclaimers(userIdentifier)
+      setDisclaimersAccepted(hasAccepted)
+      
+      if (!hasAccepted) {
+        setShowDisclaimerModal(true)
+      }
+
+      await createAuditLog({
+        userId: userIdentifier,
+        userRole: 'reader',
+        action: 'view',
+        entityType: 'application',
+        entityId: 'app-start',
+        metadata: { timestamp: new Date().toISOString() },
+      })
+    }
+
+    initializeApp()
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'analyzer' && disclaimersAccepted) {
+      setShowStickyDisclaimer(true)
+    } else {
+      setShowStickyDisclaimer(false)
+    }
+  }, [activeTab, disclaimersAccepted])
 
   const handleJurisdictionChange = (jurisdictionId: string) => {
     setSettings(current => {
@@ -53,12 +94,27 @@ function App() {
     toast.success('Jurisdiction updated')
   }
 
-  const handleSectionSelect = (section: Section) => {
+  const handleSectionSelect = async (section: Section) => {
     setSelectedSection(section)
     setShowSectionDetail(true)
+
+    if (userId) {
+      await createAuditLog({
+        userId,
+        userRole: 'reader',
+        action: 'view',
+        entityType: 'section',
+        entityId: section.id,
+        metadata: { 
+          documentId: section.documentId, 
+          title: section.title,
+          citation: section.canonicalCitation 
+        },
+      })
+    }
   }
 
-  const handleBookmarkSection = () => {
+  const handleBookmarkSection = async () => {
     if (!selectedSection) return
 
     const existingBookmark = (bookmarks || []).find(b => b.sectionId === selectedSection.id)
@@ -78,6 +134,20 @@ function App() {
 
     setBookmarks(current => [newBookmark, ...(current || [])])
     toast.success('Section bookmarked')
+
+    if (userId) {
+      await createAuditLog({
+        userId,
+        userRole: 'reader',
+        action: 'create',
+        entityType: 'bookmark',
+        entityId: newBookmark.id,
+        metadata: { 
+          sectionId: selectedSection.id,
+          documentId: selectedSection.documentId 
+        },
+      })
+    }
   }
 
   const handleNavigateToBookmark = (bookmark: Bookmark) => {
@@ -95,6 +165,31 @@ function App() {
   const selectedDocument = selectedSection 
     ? documents.find(d => d.id === selectedSection.documentId)
     : undefined
+
+  const handleDisclaimersAccepted = () => {
+    setDisclaimersAccepted(true)
+    setShowDisclaimerModal(false)
+    toast.success('Welcome to Civics Stack', {
+      description: 'You can now explore legal hierarchies and constitutional text.',
+    })
+  }
+
+  if (!disclaimersAccepted) {
+    return (
+      <>
+        <LegalDisclaimerModal
+          open={showDisclaimerModal}
+          onAccept={handleDisclaimersAccepted}
+          userId={userId}
+        />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-muted-foreground">Loading application...</p>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,6 +312,7 @@ function App() {
       </Dialog>
 
       <Toaster position="top-center" />
+      <StickyDisclaimer show={showStickyDisclaimer} variant="legal-advice" />
     </div>
   )
 }
