@@ -13,8 +13,24 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import { Warning, SealCheck, ArrowRight, ArrowLeft } from '@phosphor-icons/react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu'
+import { Warning, SealCheck, ArrowRight, ArrowLeft, DownloadSimple, Printer, FileText } from '@phosphor-icons/react'
 import { LEGAL_DISCLAIMERS, DisclaimerType, recordUserAcknowledgment } from '@/lib/compliance'
+import {
+  generateDisclaimerDocument,
+  downloadDisclaimer,
+  printDisclaimer,
+  copyToClipboard,
+  getAllDisclaimerTypes,
+} from '@/lib/disclaimer-export'
+import { toast } from 'sonner'
 
 interface LegalDisclaimerModalProps {
   open: boolean
@@ -91,6 +107,60 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
     setScrolledToBottom(isAtBottom)
   }
 
+  const handleExport = async (format: 'html' | 'markdown' | 'text') => {
+    try {
+      const user = await window.spark.user()
+      const content = generateDisclaimerDocument(requiredDisclaimers, {
+        format,
+        includeMetadata: true,
+        includeTimestamp: true,
+        userId: userId,
+        userName: user?.login,
+      })
+      downloadDisclaimer(content, format)
+      toast.success(`Disclaimers exported as ${format.toUpperCase()}`)
+    } catch (error) {
+      toast.error('Failed to export disclaimers')
+      console.error('Export error:', error)
+    }
+  }
+
+  const handlePrint = async () => {
+    try {
+      const user = await window.spark.user()
+      const content = generateDisclaimerDocument(requiredDisclaimers, {
+        format: 'html',
+        includeMetadata: true,
+        includeTimestamp: true,
+        userId: userId,
+        userName: user?.login,
+      })
+      printDisclaimer(content)
+      toast.success('Opening print dialog...')
+    } catch (error) {
+      toast.error('Failed to print disclaimers')
+      console.error('Print error:', error)
+    }
+  }
+
+  const handleCopyText = async () => {
+    try {
+      const user = await window.spark.user()
+      const content = generateDisclaimerDocument(requiredDisclaimers, {
+        format: 'text',
+        includeMetadata: true,
+        includeTimestamp: true,
+        userId: userId,
+        userName: user?.login,
+      })
+      await copyToClipboard(content)
+      toast.success('Disclaimers copied to clipboard')
+    } catch (error) {
+      toast.error('Failed to copy to clipboard')
+      console.error('Copy error:', error)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent 
@@ -108,6 +178,39 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
                 Disclosure {currentPage + 1} of {requiredDisclaimers.length}
               </DialogDescription>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                  <DownloadSimple className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Export All Disclaimers</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleExport('html')} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Download as HTML
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('markdown')} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Download as Markdown
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('text')} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Download as Text
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handlePrint} className="gap-2">
+                  <Printer className="w-4 h-4" />
+                  Print Disclaimers
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyText} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Copy as Text
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </DialogHeader>
 

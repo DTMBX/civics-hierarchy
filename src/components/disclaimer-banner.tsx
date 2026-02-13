@@ -1,12 +1,22 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Warning, Scales, SealCheck } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { DownloadSimple } from '@phosphor-icons/react'
 
 interface DisclaimerBannerProps {
   variant?: 'legal-advice' | 'verify-sources' | 'court-use' | 'educational'
   showIcon?: boolean
   dismissible?: boolean
   onDismiss?: () => void
+  showExport?: boolean
+  onExport?: () => void
 }
 
 export function DisclaimerBanner({
@@ -14,6 +24,8 @@ export function DisclaimerBanner({
   showIcon = true,
   dismissible = false,
   onDismiss,
+  showExport = false,
+  onExport,
 }: DisclaimerBannerProps) {
   const configs = {
     'legal-advice': {
@@ -63,16 +75,29 @@ export function DisclaimerBanner({
             {config.description}
           </AlertDescription>
         </div>
-        {dismissible && onDismiss && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onDismiss} 
-            className="shrink-0 h-8 px-3 text-xs"
-          >
-            Dismiss
-          </Button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {showExport && onExport && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onExport} 
+              className="h-8 px-3 text-xs gap-1.5"
+            >
+              <DownloadSimple className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
+          )}
+          {dismissible && onDismiss && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onDismiss} 
+              className="h-8 px-3 text-xs"
+            >
+              Dismiss
+            </Button>
+          )}
+        </div>
       </div>
     </Alert>
   )
@@ -81,14 +106,21 @@ export function DisclaimerBanner({
 interface StickyDisclaimerProps {
   show: boolean
   variant?: 'legal-advice' | 'verify-sources' | 'court-use' | 'educational'
+  onExport?: () => void
 }
 
-export function StickyDisclaimer({ show, variant = 'legal-advice' }: StickyDisclaimerProps) {
+export function StickyDisclaimer({ show, variant = 'legal-advice', onExport }: StickyDisclaimerProps) {
   if (!show) return null
 
   return (
     <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-lg z-40 animate-in slide-in-from-bottom-5 duration-300">
-      <DisclaimerBanner variant={variant} showIcon={true} dismissible={false} />
+      <DisclaimerBanner 
+        variant={variant} 
+        showIcon={true} 
+        dismissible={false}
+        showExport={true}
+        onExport={onExport}
+      />
     </div>
   )
 }

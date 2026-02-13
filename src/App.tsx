@@ -17,11 +17,13 @@ import { LocalOrdinanceSubmission } from '@/components/local-ordinance-submissio
 import { SectionDetail } from '@/components/section-detail'
 import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
 import { StickyDisclaimer } from '@/components/disclaimer-banner'
+import { DisclaimerViewer } from '@/components/disclaimer-viewer'
 import { jurisdictions, documents, sections } from '@/lib/seed-data'
 import { Section, Bookmark, UserSettings } from '@/lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { hasAcknowledgedRequiredDisclaimers, createAuditLog } from '@/lib/compliance'
 
@@ -35,6 +37,7 @@ function App() {
   const [disclaimersAccepted, setDisclaimersAccepted] = useState(false)
   const [userId, setUserId] = useState<string>('')
   const [showStickyDisclaimer, setShowStickyDisclaimer] = useState(false)
+  const [showDisclaimerViewer, setShowDisclaimerViewer] = useState(false)
 
   const [settings, setSettings] = useKV<UserSettings>('user-settings', {
     selectedJurisdictionId: 'us-ca',
@@ -328,6 +331,24 @@ function App() {
             </div>
 
             <div className="space-y-2">
+              <Label>Legal Disclaimers</Label>
+              <p className="text-sm text-muted-foreground">
+                View, export, or print all legal disclaimers for your records
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowDisclaimerViewer(true)
+                  setShowSettings(false)
+                }}
+                className="w-full"
+              >
+                View & Export Disclaimers
+              </Button>
+            </div>
+
+            <div className="space-y-2">
               <Label>Data Privacy</Label>
               <p className="text-sm text-muted-foreground">
                 Your notes and bookmarks are stored locally on your device. We do not collect 
@@ -346,8 +367,18 @@ function App() {
         </DialogContent>
       </Dialog>
 
+      <DisclaimerViewer
+        open={showDisclaimerViewer}
+        onOpenChange={setShowDisclaimerViewer}
+        userId={userId}
+      />
+
       <Toaster position="top-center" />
-      <StickyDisclaimer show={showStickyDisclaimer} variant="legal-advice" />
+      <StickyDisclaimer 
+        show={showStickyDisclaimer} 
+        variant="legal-advice"
+        onExport={() => setShowDisclaimerViewer(true)}
+      />
     </div>
   )
 }
