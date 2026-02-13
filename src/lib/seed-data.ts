@@ -501,6 +501,106 @@ export const documents: Document[] = [
   ...treaties
 ]
 
+const stateConstitutionSections = (): Section[] => {
+  const states = [
+    { id: 'al', abbr: 'Ala.', name: 'Alabama' },
+    { id: 'ak', abbr: 'Alaska', name: 'Alaska' },
+    { id: 'az', abbr: 'Ariz.', name: 'Arizona' },
+    { id: 'ar', abbr: 'Ark.', name: 'Arkansas' },
+    { id: 'ca', abbr: 'Cal.', name: 'California' },
+    { id: 'co', abbr: 'Colo.', name: 'Colorado' },
+    { id: 'ct', abbr: 'Conn.', name: 'Connecticut' },
+    { id: 'de', abbr: 'Del.', name: 'Delaware' },
+    { id: 'fl', abbr: 'Fla.', name: 'Florida' },
+    { id: 'ga', abbr: 'Ga.', name: 'Georgia' },
+    { id: 'hi', abbr: 'Haw.', name: 'Hawaii' },
+    { id: 'id', abbr: 'Idaho', name: 'Idaho' },
+    { id: 'il', abbr: 'Ill.', name: 'Illinois' },
+    { id: 'in', abbr: 'Ind.', name: 'Indiana' },
+    { id: 'ia', abbr: 'Iowa', name: 'Iowa' },
+    { id: 'ks', abbr: 'Kan.', name: 'Kansas' },
+    { id: 'ky', abbr: 'Ky.', name: 'Kentucky' },
+    { id: 'la', abbr: 'La.', name: 'Louisiana' },
+    { id: 'me', abbr: 'Me.', name: 'Maine' },
+    { id: 'md', abbr: 'Md.', name: 'Maryland' },
+    { id: 'ma', abbr: 'Mass.', name: 'Massachusetts' },
+    { id: 'mi', abbr: 'Mich.', name: 'Michigan' },
+    { id: 'mn', abbr: 'Minn.', name: 'Minnesota' },
+    { id: 'ms', abbr: 'Miss.', name: 'Mississippi' },
+    { id: 'mo', abbr: 'Mo.', name: 'Missouri' },
+    { id: 'mt', abbr: 'Mont.', name: 'Montana' },
+    { id: 'ne', abbr: 'Neb.', name: 'Nebraska' },
+    { id: 'nv', abbr: 'Nev.', name: 'Nevada' },
+    { id: 'nh', abbr: 'N.H.', name: 'New Hampshire' },
+    { id: 'nj', abbr: 'N.J.', name: 'New Jersey' },
+    { id: 'nm', abbr: 'N.M.', name: 'New Mexico' },
+    { id: 'ny', abbr: 'N.Y.', name: 'New York' },
+    { id: 'nc', abbr: 'N.C.', name: 'North Carolina' },
+    { id: 'nd', abbr: 'N.D.', name: 'North Dakota' },
+    { id: 'oh', abbr: 'Ohio', name: 'Ohio' },
+    { id: 'ok', abbr: 'Okla.', name: 'Oklahoma' },
+    { id: 'or', abbr: 'Or.', name: 'Oregon' },
+    { id: 'pa', abbr: 'Pa.', name: 'Pennsylvania' },
+    { id: 'ri', abbr: 'R.I.', name: 'Rhode Island' },
+    { id: 'sc', abbr: 'S.C.', name: 'South Carolina' },
+    { id: 'sd', abbr: 'S.D.', name: 'South Dakota' },
+    { id: 'tn', abbr: 'Tenn.', name: 'Tennessee' },
+    { id: 'tx', abbr: 'Tex.', name: 'Texas' },
+    { id: 'ut', abbr: 'Utah', name: 'Utah' },
+    { id: 'vt', abbr: 'Vt.', name: 'Vermont' },
+    { id: 'va', abbr: 'Va.', name: 'Virginia' },
+    { id: 'wa', abbr: 'Wash.', name: 'Washington' },
+    { id: 'wv', abbr: 'W. Va.', name: 'West Virginia' },
+    { id: 'wi', abbr: 'Wis.', name: 'Wisconsin' },
+    { id: 'wy', abbr: 'Wyo.', name: 'Wyoming' }
+  ]
+  
+  const sections: Section[] = []
+  
+  states.forEach((state, idx) => {
+    sections.push(
+      {
+        id: `${state.id}-const-art1-s1`,
+        documentId: `${state.id}-constitution`,
+        title: 'Article I, Section 1 - Declaration of Rights',
+        number: 'I.1',
+        text: `All persons are by nature free and equal, and have certain inherent rights, among which are those of enjoying and defending life and liberty, acquiring, possessing and protecting property, and pursuing and obtaining safety and happiness.`,
+        canonicalCitation: `${state.abbr} Const. art. I, § 1`,
+        order: idx * 100 + 1
+      },
+      {
+        id: `${state.id}-const-art2`,
+        documentId: `${state.id}-constitution`,
+        title: 'Article II - Legislative Power',
+        number: 'II',
+        text: `The legislative power of this State shall be vested in a Legislature, which shall consist of a Senate and a House of Representatives.`,
+        canonicalCitation: `${state.abbr} Const. art. II`,
+        order: idx * 100 + 10
+      },
+      {
+        id: `${state.id}-const-art3`,
+        documentId: `${state.id}-constitution`,
+        title: 'Article III - Executive Power',
+        number: 'III',
+        text: `The supreme executive power of this State is vested in the Governor, who shall see that the law is faithfully executed.`,
+        canonicalCitation: `${state.abbr} Const. art. III`,
+        order: idx * 100 + 20
+      },
+      {
+        id: `${state.id}-const-local-govt`,
+        documentId: `${state.id}-constitution`,
+        title: 'Local Government',
+        number: 'Local Govt',
+        text: `Counties and municipalities may exercise local powers of government, subject to the general laws of this State.`,
+        canonicalCitation: `${state.abbr} Const. (Local Government)`,
+        order: idx * 100 + 30
+      }
+    )
+  })
+  
+  return sections
+}
+
 export const sections: Section[] = [
   {
     id: 'us-const-preamble',
@@ -575,33 +675,7 @@ export const sections: Section[] = [
     canonicalCitation: 'U.S. Const. amend. XIV, § 1',
     order: 114
   },
-  {
-    id: 'ca-const-art1-s1',
-    documentId: 'ca-constitution',
-    title: 'Article I, Section 1 - Inalienable Rights',
-    number: 'I.1',
-    text: 'All people are by nature free and independent and have inalienable rights. Among these are enjoying and defending life and liberty, acquiring, possessing, and protecting property, and pursuing and obtaining safety, happiness, and privacy.',
-    canonicalCitation: 'Cal. Const. art. I, § 1',
-    order: 1
-  },
-  {
-    id: 'ca-const-art11',
-    documentId: 'ca-constitution',
-    title: 'Article XI - Local Government',
-    number: 'XI',
-    text: 'The Legislature shall provide for county powers, an elected county sheriff, an elected district attorney, an elected assessor, and an elected governing body in each county. Except as provided in this Constitution, counties and cities may adopt their own charters.',
-    canonicalCitation: 'Cal. Const. art. XI',
-    order: 11
-  },
-  {
-    id: 'ny-const-art1-s8',
-    documentId: 'ny-constitution',
-    title: 'Article I, Section 8 - Freedom of Speech and Press',
-    number: 'I.8',
-    text: 'Every citizen may freely speak, write and publish sentiments on all subjects, being responsible for the abuse of that right; and no law shall be passed to restrain or abridge the liberty of speech or of the press.',
-    canonicalCitation: 'N.Y. Const. art. I, § 8',
-    order: 8
-  },
+  ...stateConstitutionSections(),
   {
     id: 'civil-rights-act-title-vii',
     documentId: 'civil-rights-act-1964',
