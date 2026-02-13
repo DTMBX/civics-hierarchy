@@ -55,10 +55,10 @@ export function HierarchyLadder({
       aria-label="Authority Hierarchy"
     >
       <div className="p-4 border-b border-sidebar-border">
-        <h2 className="text-sm font-semibold tracking-wide uppercase text-sidebar-primary">
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-primary dark:text-sidebar-primary">
           Authority Hierarchy
         </h2>
-        <p className="text-xs text-sidebar-foreground/60 mt-1">
+        <p className="text-xs text-muted-foreground dark:text-sidebar-foreground/60 mt-1">
           Highest → Lowest authority
         </p>
       </div>
@@ -133,7 +133,7 @@ export function HierarchyLadder({
       </ScrollArea>
 
       {/* Legend */}
-      <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/60 space-y-1">
+      <div className="p-3 border-t border-sidebar-border text-xs text-muted-foreground dark:text-sidebar-foreground/60 space-y-1">
         <div className="flex items-center gap-2">
           <span className="inline-block w-3 h-3 rounded bg-primary/30 dark:bg-primary/40" />
           Federal

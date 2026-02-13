@@ -475,7 +475,7 @@ export function LegalResourcesView({
               </CardContent>
             </Card>
             <Card
-              className="cursor-pointer hover:shadow-md transition-shadow border-amber-300/30 dark:border-amber-800/30"
+              className="cursor-pointer hover:shadow-md transition-shadow border-accent/20 dark:border-accent/15"
               onClick={() => onNavigate('federal-register')}
             >
               <CardContent className="flex items-center gap-3 p-4">
@@ -491,7 +491,7 @@ export function LegalResourcesView({
         <a href="https://www.congress.gov" target="_blank" rel="noopener noreferrer">
           <Card className="cursor-pointer hover:shadow-md transition-shadow h-full">
             <CardContent className="flex items-center gap-3 p-4">
-              <Buildings size={24} className="text-blue-700" weight="duotone" />
+              <Buildings size={24} className="text-primary dark:text-primary" weight="duotone" />
               <div>
                 <p className="text-sm font-semibold">Congress.gov</p>
                 <p className="text-xs text-muted-foreground">Bills & laws</p>

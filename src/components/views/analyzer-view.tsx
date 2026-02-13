@@ -183,17 +183,17 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
 
         <DisclaimerBanner variant="legal-advice" showIcon={true} />
 
-        <Alert className="border-2 border-amber-500 bg-amber-50 dark:bg-amber-950">
-          <Scales className="h-6 w-6 text-amber-700 dark:text-amber-400" weight="fill" />
-          <AlertTitle className="text-lg font-bold text-amber-900 dark:text-amber-200">
+        <Alert className="border-2 border-destructive/50 bg-destructive/5 dark:bg-destructive/10">
+          <Scales className="h-6 w-6 text-destructive" weight="fill" />
+          <AlertTitle className="text-lg font-bold text-destructive">
             Critical: Not Legal Advice - Educational Tool Only
           </AlertTitle>
-          <AlertDescription className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed mt-2">
+          <AlertDescription className="text-sm text-destructive/90 dark:text-destructive/80 leading-relaxed mt-2">
             {report.disclaimer}
           </AlertDescription>
         </Alert>
 
-        <Card className="border-2 border-blue-200 bg-blue-50/50">
+        <Card className="border-2 border-primary/20 bg-primary/5 dark:bg-primary/10">
           <CardHeader>
             <CardTitle className="text-xl font-serif">Court-Defensible Usage Guidelines</CardTitle>
             <CardDescription className="text-base">

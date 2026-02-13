@@ -72,14 +72,14 @@
   --chart-4: oklch(0.55 0.12 180);                   /* teal                   */
   --chart-5: oklch(0.60 0.10 300);                   /* slate purple           */
   
-  --sidebar: oklch(0.22 0.04 250);                   /* dark navy sidebar      */
-  --sidebar-foreground: oklch(0.92 0.01 80);
-  --sidebar-primary: oklch(0.73 0.14 75);            /* gold highlight         */
-  --sidebar-primary-foreground: oklch(0.18 0.02 75);
-  --sidebar-accent: oklch(0.30 0.06 250);
-  --sidebar-accent-foreground: oklch(0.92 0.01 80);
-  --sidebar-border: oklch(0.35 0.05 250);
-  --sidebar-ring: oklch(0.73 0.14 75);
+  --sidebar: oklch(0.95 0.008 250);                   /* light slate sidebar    */
+  --sidebar-foreground: oklch(0.20 0.03 255);
+  --sidebar-primary: oklch(0.30 0.08 250);             /* navy highlight         */
+  --sidebar-primary-foreground: oklch(0.98 0.005 80);
+  --sidebar-accent: oklch(0.90 0.01 250);
+  --sidebar-accent-foreground: oklch(0.20 0.03 255);
+  --sidebar-border: oklch(0.86 0.01 250);
+  --sidebar-ring: oklch(0.45 0.12 250);
   
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --font-serif: 'Newsreader', Georgia, serif;
@@ -226,10 +226,16 @@
     font-family: var(--font-serif);
   }
 
-  /* Smooth theme transition */
-  html:not(.no-transition),
-  html:not(.no-transition) * {
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+  /* Smooth theme transition — scoped to key surfaces, not every element */
+  body,
+  header,
+  nav,
+  aside,
+  .bg-card,
+  .bg-background,
+  .bg-popover,
+  .bg-sidebar {
+    transition: background-color 0.25s ease, border-color 0.2s ease, color 0.15s ease;
   }
 
   /* Subtle texture for parchment feel */

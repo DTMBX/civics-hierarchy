@@ -213,7 +213,7 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
                         About These Disclaimers
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3 text-sm text-blue-900">
+                    <CardContent className="space-y-3 text-sm text-primary dark:text-foreground">
                       <p>
                         These legal disclaimers are designed to ensure court-defensible compliance and
                         transparency. They define the boundaries of how this educational platform should be

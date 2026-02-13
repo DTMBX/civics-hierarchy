@@ -34,8 +34,8 @@ export function SourceVerificationDisplay({
         return {
           icon: SealCheck,
           label: 'Official Source',
-          color: 'bg-green-100 text-green-800 border-green-200',
-          iconColor: 'text-green-600',
+          color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700',
+          iconColor: 'text-green-600 dark:text-green-400',
           description:
             'Verified from official government source. Court-defensible provenance documented.',
         }
@@ -43,16 +43,16 @@ export function SourceVerificationDisplay({
         return {
           icon: SealCheck,
           label: 'Verified',
-          color: 'bg-blue-100 text-blue-800 border-blue-200',
-          iconColor: 'text-blue-600',
+          color: 'bg-primary/10 text-primary border-primary/20 dark:bg-primary/15 dark:border-primary/30',
+          iconColor: 'text-primary',
           description: 'Verified by curators against primary sources. Citation traceable.',
         }
       case 'unverified':
         return {
           icon: Warning,
           label: 'Unverified',
-          color: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700',
-          iconColor: 'text-amber-600 dark:text-amber-400',
+          color: 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30',
+          iconColor: 'text-destructive',
           description:
             'User-submitted content. Not independently verified. Do not rely on for legal purposes.',
         }
@@ -138,9 +138,9 @@ export function SourceVerificationDisplay({
         {verificationStatus === 'unverified' && (
           <>
             <Separator />
-            <div className="bg-amber-50 dark:bg-amber-950 border-2 border-amber-200 dark:border-amber-700 rounded-lg p-4">
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">⚠️ Court Use Warning</p>
-              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+            <div className="bg-destructive/5 dark:bg-destructive/10 border-2 border-destructive/20 dark:border-destructive/30 rounded-lg p-4">
+              <p className="text-sm font-semibold text-destructive mb-2">⚠️ Court Use Warning</p>
+              <p className="text-sm text-destructive/90 dark:text-destructive/80 leading-relaxed">
                 This content has not been independently verified. Do NOT cite this in court filings
                 or legal proceedings. Always verify through official government sources.
               </p>
@@ -164,11 +164,11 @@ export function SourceVerificationDisplay({
 
         <Separator />
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-xs font-semibold text-blue-900 mb-2">
+        <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-lg p-4">
+          <p className="text-xs font-semibold text-primary dark:text-foreground mb-2">
             📋 For Court Filings & Legal Proceedings
           </p>
-          <p className="text-xs text-blue-800 leading-relaxed">
+          <p className="text-xs text-primary/80 dark:text-foreground/70 leading-relaxed">
             Always cite directly to official government publications, not to this educational
             platform. Consult the{' '}
             <span className="font-semibold">Bluebook</span> or your jurisdiction's citation rules.
@@ -193,22 +193,22 @@ export function VerificationBadge({ status, showLabel = true, size = 'md' }: Ver
         return {
           icon: SealCheck,
           label: 'Official',
-          className: 'bg-green-100 text-green-800 border-green-300',
-          iconColor: 'text-green-700',
+          className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700',
+          iconColor: 'text-green-700 dark:text-green-400',
         }
       case 'verified':
         return {
           icon: SealCheck,
           label: 'Verified',
-          className: 'bg-blue-100 text-blue-800 border-blue-300',
-          iconColor: 'text-blue-700',
+          className: 'bg-primary/10 text-primary border-primary/20 dark:bg-primary/15 dark:border-primary/30',
+          iconColor: 'text-primary',
         }
       case 'unverified':
         return {
           icon: Warning,
           label: 'Unverified',
-          className: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800',
-          iconColor: 'text-amber-700 dark:text-amber-400',
+          className: 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30',
+          iconColor: 'text-destructive',
         }
     }
   }

@@ -107,21 +107,21 @@ export function AuditLogViewer({ isAdmin = false }: AuditLogViewerProps) {
   const getActionBadgeColor = (action: AuditAction) => {
     switch (action) {
       case 'create':
-        return 'bg-green-100 text-green-800 border-green-300'
+        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700'
       case 'update':
-        return 'bg-blue-100 text-blue-800 border-blue-300'
+        return 'bg-primary/10 text-primary border-primary/20 dark:bg-primary/15 dark:border-primary/30'
       case 'delete':
-        return 'bg-red-100 text-red-800 border-red-300'
+        return 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30'
       case 'approve':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300'
+        return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700'
       case 'reject':
-        return 'bg-orange-100 text-orange-800 border-orange-300'
+        return 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30'
       case 'verify':
-        return 'bg-purple-100 text-purple-800 border-purple-300'
+        return 'bg-accent/10 text-accent-foreground dark:text-accent border-accent/20 dark:bg-accent/15 dark:border-accent/30'
       case 'flag':
-        return 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+        return 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300'
+        return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -174,11 +174,11 @@ export function AuditLogViewer({ isAdmin = false }: AuditLogViewerProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm font-semibold text-blue-900 mb-2">
+          <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-lg p-4 mb-6">
+            <p className="text-sm font-semibold text-primary dark:text-foreground mb-2">
               🔒 Court-Defensible Audit Trail
             </p>
-            <p className="text-sm text-blue-800 leading-relaxed">
+            <p className="text-sm text-primary/80 dark:text-foreground/70 leading-relaxed">
               All actions are logged with timestamps, user identification, and full change history.
               This audit trail is immutable and can be used to demonstrate compliance and
               accountability in legal proceedings. Retention period: 7 years minimum.
