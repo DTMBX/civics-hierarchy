@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { MagnifyingGlass, BookmarkSimple, ClockCounterClockwise, Books, ChartBar, Warning, Scales, Scroll, GlobeHemisphereWest, ArrowSquareOut } from '@phosphor-icons/react'
+import { MagnifyingGlass, BookmarkSimple, ClockCounterClockwise, Books, ChartBar, Warning, Scales, Scroll, GlobeHemisphereWest, ArrowSquareOut, Shield, Star } from '@phosphor-icons/react'
 import { Bookmark, Jurisdiction } from '@/lib/types'
 import { CitationLibraryStats } from '@/components/citation-library-stats'
 import { useState } from 'react'
@@ -41,47 +41,66 @@ export function HomeView({
   }
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Understand the Law
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Access constitutional documents and learn about legal hierarchy
-          </p>
+    <div className="space-y-8">
+      {/* ── Hero Section ─────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary to-[oklch(0.35_0.07_250)] dark:from-[oklch(0.14_0.025_255)] dark:via-[oklch(0.18_0.03_252)] dark:to-[oklch(0.22_0.04_250)] px-6 py-10 md:py-14 shadow-lg">
+        {/* Decorative stars */}
+        <div className="absolute top-4 right-6 flex gap-1.5 opacity-20">
+          <Star size={14} weight="fill" className="text-accent" />
+          <Star size={10} weight="fill" className="text-accent" />
+          <Star size={14} weight="fill" className="text-accent" />
         </div>
-
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <MagnifyingGlass
-              size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              placeholder="Search constitutional text, amendments..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
+        <div className="absolute bottom-4 left-6 flex gap-1.5 opacity-15">
+          <Star size={10} weight="fill" className="text-primary-foreground" />
+          <Star size={14} weight="fill" className="text-primary-foreground" />
+          <Star size={10} weight="fill" className="text-primary-foreground" />
+        </div>
+        <div className="relative z-10 max-w-2xl">
+          <div className="flex items-center gap-2 mb-3">
+            <Shield size={24} weight="fill" className="text-accent" />
+            <span className="text-xs uppercase tracking-[0.2em] font-semibold text-accent">
+              Constitutional Research Platform
+            </span>
           </div>
-          <Button onClick={handleSearch}>
-            Search
-          </Button>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-serif text-primary-foreground leading-tight">
+            Understand the
+            <span className="block text-accent">Hierarchy of Law</span>
+          </h2>
+          <p className="text-primary-foreground/70 mt-3 text-base md:text-lg max-w-lg">
+            Explore every layer of American law — from the U.S. Constitution to local ordinances — with primary sources and live legal data.
+          </p>
+
+          <div className="flex gap-2 mt-6">
+            <div className="relative flex-1 max-w-md">
+              <MagnifyingGlass
+                size={20}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                placeholder="Search amendments, statutes, case law..."
+                className="pl-10 bg-white/95 dark:bg-white/10 border-white/30 text-foreground dark:text-primary-foreground placeholder:text-muted-foreground"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-sm">
+              Search
+            </Button>
+          </div>
         </div>
       </section>
 
       {selectedJurisdiction && (
-        <Card className="bg-primary/5 border-primary/20">
+        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 dark:from-primary/10 dark:to-accent/10 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Your Jurisdiction</CardTitle>
+            <CardTitle className="text-lg font-serif">Your Jurisdiction</CardTitle>
             <CardDescription>
               Currently viewing laws for {selectedJurisdiction.name}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={onNavigateToLibrary} className="w-full">
+            <Button onClick={onNavigateToLibrary} className="w-full bg-primary hover:bg-primary/90">
               <Books size={18} />
               View My Legal Stack
             </Button>
@@ -89,11 +108,12 @@ export function HomeView({
         </Card>
       )}
 
+      {/* ── Stats strip ────────────────────────────────────────────── */}
       <section className="grid md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide">Database Size</CardDescription>
-            <CardTitle className="text-3xl font-bold">50+ States</CardTitle>
+            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-primary/70 dark:text-primary/80">Database Size</CardDescription>
+            <CardTitle className="text-3xl font-bold font-serif text-primary dark:text-primary">50+ States</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -102,10 +122,10 @@ export function HomeView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-destructive shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide">Federal Sources</CardDescription>
-            <CardTitle className="text-3xl font-bold">Statutes & Treaties</CardTitle>
+            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-destructive/70 dark:text-destructive/80">Federal Sources</CardDescription>
+            <CardTitle className="text-3xl font-bold font-serif">Statutes & Treaties</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -114,10 +134,10 @@ export function HomeView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-accent shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <CardDescription className="text-xs uppercase tracking-wide">Full-Text Search</CardDescription>
-            <CardTitle className="text-3xl font-bold">Advanced</CardTitle>
+            <CardDescription className="text-xs uppercase tracking-wide font-semibold text-accent-foreground/70 dark:text-accent/80">Full-Text Search</CardDescription>
+            <CardTitle className="text-3xl font-bold font-serif">Advanced</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -127,15 +147,16 @@ export function HomeView({
         </Card>
       </section>
 
+      {/* ── Core Features ─────────────────────────────────────────── */}
       <section className="grid md:grid-cols-2 gap-4">
-        <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={onNavigateToLibrary}>
+        <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-primary/10" onClick={onNavigateToLibrary}>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2.5 rounded-lg bg-primary/10 dark:bg-primary/20 group-hover:bg-primary/15 transition-colors">
                 <Books size={24} className="text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">Constitutional Library</CardTitle>
+                <CardTitle className="text-lg font-serif">Constitutional Library</CardTitle>
                 <CardDescription>
                   Browse U.S. Constitution, state documents, and federal statutes
                 </CardDescription>
@@ -144,14 +165,14 @@ export function HomeView({
           </CardHeader>
         </Card>
 
-        <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={onNavigateToAnalyzer}>
+        <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-accent/10" onClick={onNavigateToAnalyzer}>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <ChartBar size={24} className="text-accent-foreground" />
+              <div className="p-2.5 rounded-lg bg-accent/10 dark:bg-accent/20 group-hover:bg-accent/15 transition-colors">
+                <ChartBar size={24} className="text-accent-foreground dark:text-accent" />
               </div>
               <div>
-                <CardTitle className="text-lg">Conflict Analyzer</CardTitle>
+                <CardTitle className="text-lg font-serif">Conflict Analyzer</CardTitle>
                 <CardDescription>
                   Learn to evaluate legal conflicts and preemption
                 </CardDescription>
@@ -161,18 +182,19 @@ export function HomeView({
         </Card>
       </section>
 
-      {/* Live Legal Data APIs */}
+      {/* ── Live Legal Data APIs ────────────────────────────────── */}
       <section className="space-y-3">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Scales size={20} className="text-primary" weight="duotone" />
+        <h3 className="text-lg font-semibold font-serif flex items-center gap-2">
+          <Scales size={20} className="text-primary dark:text-accent" weight="duotone" />
           Live Legal Data
+          <span className="ml-1 text-[10px] uppercase tracking-wider bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive px-2 py-0.5 rounded-full font-sans font-semibold">Live</span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {onNavigateToCaseLaw && (
-            <Card className="cursor-pointer transition-shadow hover:shadow-md border-primary/20" onClick={onNavigateToCaseLaw}>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-primary/20 dark:border-primary/30" onClick={onNavigateToCaseLaw}>
               <CardContent className="flex items-center gap-3 p-4">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Scales size={22} className="text-primary" weight="duotone" />
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20 group-hover:bg-primary/15 transition-colors">
+                  <Scales size={22} className="text-primary dark:text-primary" weight="duotone" />
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Case Law Search</p>
@@ -182,10 +204,10 @@ export function HomeView({
             </Card>
           )}
           {onNavigateToFederalRegister && (
-            <Card className="cursor-pointer transition-shadow hover:shadow-md border-amber-300/30 dark:border-amber-800/30" onClick={onNavigateToFederalRegister}>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-accent/20 dark:border-accent/30" onClick={onNavigateToFederalRegister}>
               <CardContent className="flex items-center gap-3 p-4">
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
-                  <Scroll size={22} className="text-amber-700 dark:text-amber-400" weight="duotone" />
+                <div className="p-2 rounded-lg bg-accent/10 dark:bg-accent/20 group-hover:bg-accent/15 transition-colors">
+                  <Scroll size={22} className="text-accent-foreground dark:text-accent" weight="duotone" />
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Federal Register</p>
@@ -195,10 +217,10 @@ export function HomeView({
             </Card>
           )}
           {onNavigateToResources && (
-            <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={onNavigateToResources}>
+            <Card className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 group border-primary/10 dark:border-primary/20" onClick={onNavigateToResources}>
               <CardContent className="flex items-center gap-3 p-4">
-                <div className="p-2 rounded-lg bg-green-100">
-                  <GlobeHemisphereWest size={22} className="text-green-700" weight="duotone" />
+                <div className="p-2 rounded-lg bg-primary/5 dark:bg-primary/15 group-hover:bg-primary/10 transition-colors">
+                  <GlobeHemisphereWest size={22} className="text-primary dark:text-primary" weight="duotone" />
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Legal Resources</p>
@@ -210,9 +232,9 @@ export function HomeView({
         </div>
       </section>
 
-      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
-        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
-        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+      <Alert className="border-accent/30 dark:border-accent/20 bg-accent/5 dark:bg-accent/10">
+        <Warning className="h-4 w-4 text-accent-foreground dark:text-accent" weight="fill" />
+        <AlertDescription className="text-xs text-foreground/80 dark:text-foreground/70">
           <strong>Educational Resource Only.</strong> This platform provides access to constitutional and statutory text for educational purposes. It does not constitute legal advice, create an attorney-client relationship, or substitute for consultation with a licensed attorney. All source text should be independently verified against official government publications.
         </AlertDescription>
       </Alert>

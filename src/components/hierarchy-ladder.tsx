@@ -33,10 +33,10 @@ const LEVEL_ICONS: Record<number, React.ReactNode> = {
 }
 
 const LEVEL_COLORS: Record<AuthorityLevel, string> = {
-  federal: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  state: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  territory: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  local: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  federal: 'bg-primary/15 text-primary dark:bg-primary/25 dark:text-primary',
+  state: 'bg-accent/15 text-accent-foreground dark:bg-accent/25 dark:text-accent',
+  territory: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+  local: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
 }
 
 export function HierarchyLadder({
@@ -50,15 +50,15 @@ export function HierarchyLadder({
 
   return (
     <aside
-      className="hidden md:flex flex-col w-72 border-r bg-card"
+      className="hidden md:flex flex-col w-72 border-r border-border bg-sidebar text-sidebar-foreground"
       role="navigation"
       aria-label="Authority Hierarchy"
     >
-      <div className="p-4 border-b">
-        <h2 className="text-sm font-semibold text-foreground tracking-wide uppercase">
+      <div className="p-4 border-b border-sidebar-border">
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-sidebar-primary">
           Authority Hierarchy
         </h2>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-sidebar-foreground/60 mt-1">
           Highest → Lowest authority
         </p>
       </div>
@@ -87,8 +87,8 @@ export function HierarchyLadder({
                   onClick={() => onNavigate(route, params)}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 text-left text-sm
-                    transition-colors hover:bg-accent/50 group
-                    ${isActive ? 'bg-accent border-l-2 border-primary' : ''}
+                    transition-colors hover:bg-sidebar-accent group
+                    ${isActive ? 'bg-sidebar-accent border-l-2 border-sidebar-primary' : ''}
                   `}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -123,7 +123,7 @@ export function HierarchyLadder({
                 {/* Connecting line between rungs */}
                 {idx < HIERARCHY_LADDER_RUNGS.length - 1 && (
                   <div className="ml-7 pl-[7px]">
-                    <div className="w-px h-2 bg-border" />
+                    <div className="w-px h-2 bg-sidebar-border" />
                   </div>
                 )}
               </div>
@@ -133,17 +133,17 @@ export function HierarchyLadder({
       </ScrollArea>
 
       {/* Legend */}
-      <div className="p-3 border-t text-xs text-muted-foreground space-y-1">
+      <div className="p-3 border-t border-sidebar-border text-xs text-sidebar-foreground/60 space-y-1">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded bg-blue-200 dark:bg-blue-800" />
+          <span className="inline-block w-3 h-3 rounded bg-primary/30 dark:bg-primary/40" />
           Federal
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded bg-amber-200 dark:bg-amber-800" />
+          <span className="inline-block w-3 h-3 rounded bg-accent/40 dark:bg-accent/50" />
           State
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded bg-green-200 dark:bg-green-800" />
+          <span className="inline-block w-3 h-3 rounded bg-emerald-200 dark:bg-emerald-800" />
           Local
         </div>
       </div>

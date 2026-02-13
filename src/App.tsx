@@ -325,8 +325,8 @@ function App() {
         />
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="text-center space-y-4 max-w-md">
-            <div className="flex items-center justify-center w-14 h-14 bg-amber-100 dark:bg-amber-900 rounded-xl mx-auto">
-              <Warning className="w-7 h-7 text-amber-600 dark:text-amber-400" weight="fill" />
+            <div className="flex items-center justify-center w-14 h-14 bg-primary/10 dark:bg-primary/20 rounded-xl mx-auto">
+              <Warning className="w-7 h-7 text-primary dark:text-accent" weight="fill" />
             </div>
             <h1 className="text-xl font-serif font-semibold">Civics Stack</h1>
             {!showDisclaimerModal ? (

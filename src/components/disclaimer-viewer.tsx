@@ -99,8 +99,8 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
         <DialogHeader className="px-5 pt-5 pb-4 border-b shrink-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg shrink-0">
-                <Warning className="w-5 h-5 text-amber-600 dark:text-amber-400" weight="fill" />
+              <div className="flex items-center justify-center w-10 h-10 bg-destructive/10 dark:bg-destructive/20 rounded-lg shrink-0">
+                <Warning className="w-5 h-5 text-destructive dark:text-destructive" weight="fill" />
               </div>
               <div>
                 <DialogTitle className="text-lg sm:text-xl font-serif">Legal Disclaimers</DialogTitle>
@@ -154,8 +154,8 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-700 rounded-md p-3">
-                            <p className="text-sm leading-relaxed whitespace-pre-line text-amber-950 dark:text-amber-200">
+                          <div className="bg-accent/5 dark:bg-accent/10 border border-accent/20 dark:border-accent/15 rounded-md p-3">
+                            <p className="text-sm leading-relaxed whitespace-pre-line text-foreground/90 dark:text-foreground/80">
                               {d.content}
                             </p>
                           </div>
@@ -175,7 +175,7 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
                     .map(type => {
                       const d = LEGAL_DISCLAIMERS[type]
                       return (
-                        <Card key={type} className="border border-amber-200 dark:border-amber-700">
+                        <Card key={type} className="border border-destructive/20 dark:border-destructive/15">
                           <CardHeader className="pb-2">
                             <CardTitle className="text-base font-serif flex items-center gap-2 flex-wrap">
                               {d.title}
@@ -190,8 +190,8 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-700 rounded-md p-3">
-                              <p className="text-sm leading-relaxed whitespace-pre-line text-amber-950 dark:text-amber-200">
+                            <div className="bg-accent/5 dark:bg-accent/10 border border-accent/20 dark:border-accent/15 rounded-md p-3">
+                              <p className="text-sm leading-relaxed whitespace-pre-line text-foreground/90 dark:text-foreground/80">
                                 {d.content}
                               </p>
                             </div>
@@ -206,10 +206,10 @@ export function DisclaimerViewer({ open, onOpenChange, userId }: DisclaimerViewe
             <TabsContent value="info" className="flex-1 overflow-hidden mt-0 min-h-0">
               <ScrollArea className="h-full">
                 <div className="space-y-4 pb-4 pr-3">
-                  <Card className="border-blue-200 bg-blue-50/50">
+                  <Card className="border-primary/20 bg-primary/5 dark:bg-primary/10">
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center gap-2 text-base">
-                        <Info className="w-4 h-4 text-blue-600" />
+                        <Info className="w-4 h-4 text-primary" />
                         About These Disclaimers
                       </CardTitle>
                     </CardHeader>

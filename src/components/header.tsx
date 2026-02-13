@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { MapPin, Gear, MagnifyingGlass, GraduationCap, Books, ChartBar, Scales, Scroll, GlobeHemisphereWest, Sun, Moon } from '@phosphor-icons/react'
+import { MapPin, Gear, MagnifyingGlass, GraduationCap, Books, ChartBar, Scales, Scroll, GlobeHemisphereWest, Sun, Moon, Shield } from '@phosphor-icons/react'
 import { Jurisdiction, RouteId } from '@/lib/types'
 import {
   Select,
@@ -44,32 +44,41 @@ export function Header({
   ]
 
   return (
-    <header className="sticky top-0 bg-card border-b border-border z-40">
-      <div className="flex items-center justify-between px-4 py-3 md:px-6">
+    <header className="sticky top-0 z-40 border-b-2 border-accent/60 bg-gradient-to-r from-primary via-primary to-[oklch(0.25_0.06_250)] dark:from-[oklch(0.14_0.025_255)] dark:via-[oklch(0.16_0.025_255)] dark:to-[oklch(0.18_0.03_252)] shadow-md">
+      {/* Thin flag-stripe accent bar */}
+      <div className="h-[3px] bg-gradient-to-r from-destructive via-accent to-primary" />
+
+      <div className="flex items-center justify-between px-4 py-2.5 md:px-6">
         <div className="flex items-center gap-4">
           <button
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
             onClick={() => onNavigate?.('home')}
           >
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight font-serif">
-              Civics Stack
-            </h1>
+            <Shield size={28} weight="fill" className="text-accent shrink-0" />
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight font-serif text-primary-foreground leading-none">
+                Civics Stack
+              </h1>
+              <span className="hidden md:block text-[10px] uppercase tracking-[0.2em] text-primary-foreground/60 font-sans font-medium">
+                We the People
+              </span>
+            </div>
           </button>
 
-          {/* Desktop nav links — hidden on mobile (handled by MobileNav) */}
+          {/* Desktop nav links */}
           {onNavigate && (
-            <nav className="hidden md:flex items-center gap-1 ml-2" aria-label="Quick links">
+            <nav className="hidden md:flex items-center gap-0.5 ml-3" aria-label="Quick links">
               {desktopNavItems.map(item => {
                 const Icon = item.icon
                 const isActive = activeRoute === item.id
                 return (
                   <Button
                     key={item.id}
-                    variant={isActive ? 'secondary' : 'ghost'}
+                    variant="ghost"
                     size="sm"
                     className={cn(
-                      'gap-1.5 text-sm',
-                      isActive && 'font-semibold'
+                      'gap-1.5 text-sm text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10',
+                      isActive && 'text-accent font-semibold bg-white/10'
                     )}
                     onClick={() => onNavigate(item.id)}
                   >
@@ -87,7 +96,7 @@ export function Header({
             value={selectedJurisdiction?.id}
             onValueChange={onJurisdictionChange}
           >
-            <SelectTrigger className="w-[130px] md:w-[200px]">
+            <SelectTrigger className="w-[130px] md:w-[200px] bg-white/10 border-white/20 text-primary-foreground text-sm">
               <div className="flex items-center gap-2">
                 <MapPin size={16} />
                 <SelectValue placeholder="Select jurisdiction" />
@@ -105,6 +114,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
+            className="text-primary-foreground/70 hover:text-accent hover:bg-white/10"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label="Toggle dark mode"
           >
@@ -112,7 +122,7 @@ export function Header({
             <Moon size={20} className="hidden dark:block" />
           </Button>
 
-          <Button variant="ghost" size="icon" onClick={onSettingsClick}>
+          <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10" onClick={onSettingsClick}>
             <Gear size={20} />
           </Button>
         </div>

@@ -147,7 +147,7 @@ export function TreatiesView({ documents, sections, onSectionSelect }: TreatiesV
       case 'ratified':
         return <CheckCircle weight="fill" className="text-green-600" size={16} />
       case 'pending':
-        return <Clock weight="fill" className="text-amber-600 dark:text-amber-400" size={16} />
+        return <Clock weight="fill" className="text-accent-foreground dark:text-accent" size={16} />
       case 'terminated':
         return <XCircle weight="fill" className="text-red-600" size={16} />
       case 'suspended':
@@ -363,9 +363,9 @@ export function TreatiesView({ documents, sections, onSectionSelect }: TreatiesV
 
                   {/* Reservations */}
                   {meta?.reservations && (
-                    <div className="p-2 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-700 rounded text-xs">
-                      <span className="font-semibold text-amber-900 dark:text-amber-200">Reservations / Notes: </span>
-                      <span className="text-amber-800 dark:text-amber-300">{meta.reservations}</span>
+                    <div className="p-2 bg-accent/5 dark:bg-accent/10 border border-accent/20 dark:border-accent/15 rounded text-xs">
+                      <span className="font-semibold text-foreground/90 dark:text-foreground/80">Reservations / Notes: </span>
+                      <span className="text-foreground/80 dark:text-foreground/70">{meta.reservations}</span>
                     </div>
                   )}
 
@@ -399,9 +399,9 @@ export function TreatiesView({ documents, sections, onSectionSelect }: TreatiesV
       </div>
 
       {/* Disclaimer */}
-      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
-        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
-        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+      <Alert className="border-accent/30 dark:border-accent/20 bg-accent/5 dark:bg-accent/10">
+        <Warning className="h-4 w-4 text-accent-foreground dark:text-accent" weight="fill" />
+        <AlertDescription className="text-xs text-foreground/80 dark:text-foreground/70">
           <strong>Educational Use Only.</strong> This module distinguishes between (a) treaty text,
           (b) ratification/status metadata, and (c) implementing legislation. Treaty status and
           reservation data is sourced from the U.S. State Department Treaty Affairs office and the

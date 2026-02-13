@@ -174,7 +174,7 @@ export function SupremeOverlay({
         <ScrollArea className="h-[calc(100vh-120px)]">
           <div className="p-6 space-y-6">
             {/* Disclaimer Banner */}
-            <div className="flex items-start gap-2 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs dark:bg-amber-950 dark:border-amber-800 dark:text-amber-200">
+            <div className="flex items-start gap-2 p-3 rounded-md bg-accent/5 border border-accent/20 text-foreground/80 text-xs dark:bg-accent/10 dark:border-accent/15 dark:text-foreground/70">
               <Warning size={16} className="shrink-0 mt-0.5" />
               <p>{STANDARD_DISCLAIMERS.comparisonDisclaimer}</p>
             </div>
@@ -225,7 +225,7 @@ export function SupremeOverlay({
               <Card className={effectiveFederal ? '' : 'opacity-50'}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    <Badge className="bg-primary/15 text-primary dark:bg-primary/25 dark:text-primary">
                       Federal
                     </Badge>
                     <Badge variant="outline" className="text-xs">
@@ -258,7 +258,7 @@ export function SupremeOverlay({
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                    <Badge className="bg-accent/15 text-accent-foreground dark:bg-accent/25 dark:text-accent">
                       {jurisdiction?.abbreviation || 'State'}
                     </Badge>
                     <Badge variant="outline" className="text-xs">

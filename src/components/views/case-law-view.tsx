@@ -370,7 +370,7 @@ export function CaseLawSearchView() {
 
       {/* Disclaimer */}
       <Alert>
-        <Warning size={16} className="text-amber-600 dark:text-amber-400" />
+        <Warning size={16} className="text-accent-foreground dark:text-accent" />
         <AlertDescription className="text-xs text-muted-foreground">
           <strong>Data Source:</strong> CourtListener by Free Law Project — public domain legal
           data. Results are for educational/research purposes and do not constitute legal

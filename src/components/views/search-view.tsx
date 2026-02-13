@@ -255,9 +255,9 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
         </Card>
       )}
 
-      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
-        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
-        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+      <Alert className="border-accent/30 dark:border-accent/20 bg-accent/5 dark:bg-accent/10">
+        <Warning className="h-4 w-4 text-accent-foreground dark:text-accent" weight="fill" />
+        <AlertDescription className="text-xs text-foreground/80 dark:text-foreground/70">
           <strong>Verify All Sources.</strong> Search results are drawn from curated educational databases. Source text may not reflect the most recent amendments or judicial interpretations. Always verify results against official government publications before relying on them for any purpose.
         </AlertDescription>
       </Alert>

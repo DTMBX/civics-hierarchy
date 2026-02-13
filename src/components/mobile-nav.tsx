@@ -50,9 +50,9 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
       {/* Overflow drawer */}
       {overflowOpen && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOverflowOpen(false)}>
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <nav
-            className="absolute bottom-16 left-0 right-0 bg-card border-t border-border rounded-t-xl p-3 grid grid-cols-4 gap-1"
+            className="absolute bottom-16 left-0 right-0 bg-card border-t border-border rounded-t-2xl p-4 grid grid-cols-4 gap-2 shadow-xl"
             onClick={e => e.stopPropagation()}
             aria-label="More navigation options"
           >
@@ -85,7 +85,7 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
 
       {/* Primary bottom bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden"
+        className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t-2 border-accent/40 z-50 md:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
         aria-label="Main navigation"
       >
         <div className="flex items-center justify-around h-16">

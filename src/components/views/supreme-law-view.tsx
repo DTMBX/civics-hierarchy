@@ -128,9 +128,9 @@ export function SupremeLawView({
       </Card>
 
       {/* Disclaimer */}
-      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
-        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
-        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+      <Alert className="border-accent/30 dark:border-accent/20 bg-accent/5 dark:bg-accent/10">
+        <Warning className="h-4 w-4 text-accent-foreground dark:text-accent" weight="fill" />
+        <AlertDescription className="text-xs text-foreground/80 dark:text-foreground/70">
           <strong>Educational Use Only.</strong> This is not legal advice. All text is sourced from
           official NARA transcripts. Always verify against official government publications before
           reliance. See{' '}
@@ -394,7 +394,7 @@ export function SupremeLawView({
                 Federal authority is limited to powers enumerated in the Constitution (Art. I, § 8)
                 and those necessary and proper to execute those powers (Necessary and Proper Clause).
               </p>
-              <p className="italic text-amber-700 dark:text-amber-400">
+              <p className="italic text-accent-foreground dark:text-accent">
                 Note: Under the "last-in-time" rule, treaties and federal statutes are co-equal in
                 authority. A later statute can supersede an earlier treaty provision, and vice versa.
                 The hierarchy shown here orders treaties above statutes for presentational clarity only.

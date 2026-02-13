@@ -479,7 +479,7 @@ export function LegalResourcesView({
               onClick={() => onNavigate('federal-register')}
             >
               <CardContent className="flex items-center gap-3 p-4">
-                <Scroll size={24} className="text-amber-700 dark:text-amber-400" weight="duotone" />
+                <Scroll size={24} className="text-accent-foreground dark:text-accent" weight="duotone" />
                 <div>
                   <p className="text-sm font-semibold">Fed. Register</p>
                   <p className="text-xs text-muted-foreground">EOs & rules</p>
@@ -548,7 +548,7 @@ export function LegalResourcesView({
 
       {/* Disclaimer */}
       <Alert>
-        <Info size={16} className="text-blue-600" />
+        <Info size={16} className="text-primary" />
         <AlertDescription className="text-xs text-muted-foreground">
           <strong>Educational Resource:</strong> These links are provided for legal research
           and education. External websites have their own terms of service. This platform

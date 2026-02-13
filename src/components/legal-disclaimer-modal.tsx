@@ -121,8 +121,8 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
             {/* ── Header ──────────────────────────────────────────── */}
             <div className="px-5 pt-5 pb-4 border-b bg-card shrink-0">
               <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg shrink-0 mt-0.5">
-                  <Warning className="w-5 h-5 text-amber-600 dark:text-amber-400" weight="fill" />
+                <div className="flex items-center justify-center w-10 h-10 bg-destructive/10 dark:bg-destructive/20 rounded-lg shrink-0 mt-0.5">
+                  <Warning className="w-5 h-5 text-destructive dark:text-destructive" weight="fill" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg sm:text-xl font-serif font-semibold tracking-tight">
@@ -283,7 +283,7 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
                 </p>
               )}
               {isLastPage && !allChecked && isCurrentChecked && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 text-center mt-2">
+                <p className="text-xs text-destructive dark:text-destructive text-center mt-2">
                   You still have unacknowledged disclosures — use the dots above to review them
                 </p>
               )}

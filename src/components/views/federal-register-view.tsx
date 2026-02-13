@@ -237,8 +237,8 @@ export function FederalRegisterView() {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg">
-            <Scroll size={24} className="text-amber-700 dark:text-amber-400" weight="duotone" />
+          <div className="flex items-center justify-center w-10 h-10 bg-accent/10 dark:bg-accent/20 rounded-lg">
+            <Scroll size={24} className="text-accent-foreground dark:text-accent" weight="duotone" />
           </div>
           <div>
             <h2 className="text-2xl font-serif font-bold">Federal Register</h2>
@@ -305,7 +305,7 @@ export function FederalRegisterView() {
 
       {/* Disclaimer */}
       <Alert>
-        <Warning size={16} className="text-amber-600 dark:text-amber-400" />
+        <Warning size={16} className="text-accent-foreground dark:text-accent" />
         <AlertDescription className="text-xs text-muted-foreground">
           <strong>Official Source:</strong> Data from the Federal Register API
           (federalregister.gov). The Federal Register is the official daily publication
