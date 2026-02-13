@@ -10,6 +10,8 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Use repo name as base path for GitHub Pages; set to '/' for custom domain
+  base: '/civics-hierarchy/',
   plugins: [
     react(),
     tailwindcss(),

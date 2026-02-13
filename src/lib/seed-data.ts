@@ -1,4 +1,5 @@
-import { Jurisdiction, Document, Section } from './types'
+import { Jurisdiction, Document, Section, LearningModule } from './types'
+import { usConstitutionSections } from './us-constitution-full'
 
 export const jurisdictions: Jurisdiction[] = [
   {
@@ -638,79 +639,13 @@ const stateConstitutionSections = (): Section[] => {
 }
 
 export const sections: Section[] = [
-  {
-    id: 'us-const-preamble',
-    documentId: 'us-constitution',
-    title: 'Preamble',
-    number: 'Preamble',
-    text: 'We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America.',
-    canonicalCitation: 'U.S. Const. pmbl.',
-    order: 0
-  },
-  {
-    id: 'us-const-art1',
-    documentId: 'us-constitution',
-    title: 'Article I - The Legislative Branch',
-    number: 'I',
-    text: 'All legislative Powers herein granted shall be vested in a Congress of the United States, which shall consist of a Senate and House of Representatives.',
-    canonicalCitation: 'U.S. Const. art. I',
-    order: 1
-  },
-  {
-    id: 'us-const-art1-s8',
-    documentId: 'us-constitution',
-    title: 'Section 8 - Powers of Congress',
-    number: 'I.8',
-    text: 'The Congress shall have Power To lay and collect Taxes, Duties, Imposts and Excises, to pay the Debts and provide for the common Defence and general Welfare of the United States; but all Duties, Imposts and Excises shall be uniform throughout the United States;\n\nTo borrow Money on the credit of the United States;\n\nTo regulate Commerce with foreign Nations, and among the several States, and with the Indian Tribes...',
-    canonicalCitation: 'U.S. Const. art. I, § 8',
-    parentSectionId: 'us-const-art1',
-    order: 8
-  },
-  {
-    id: 'us-const-art6',
-    documentId: 'us-constitution',
-    title: 'Article VI - The Supremacy Clause',
-    number: 'VI',
-    text: 'This Constitution, and the Laws of the United States which shall be made in Pursuance thereof; and all Treaties made, or which shall be made, under the Authority of the United States, shall be the supreme Law of the Land; and the Judges in every State shall be bound thereby, any Thing in the Constitution or Laws of any State to the Contrary notwithstanding.',
-    canonicalCitation: 'U.S. Const. art. VI, cl. 2',
-    order: 6
-  },
-  {
-    id: 'us-const-amend1',
-    documentId: 'us-constitution',
-    title: 'First Amendment - Freedom of Religion, Speech, Press, Assembly, Petition',
-    number: 'Amend. I',
-    text: 'Congress shall make no law respecting an establishment of religion, or prohibiting the free exercise thereof; or abridging the freedom of speech, or of the press; or the right of the people peaceably to assemble, and to petition the Government for a redress of grievances.',
-    canonicalCitation: 'U.S. Const. amend. I',
-    order: 101
-  },
-  {
-    id: 'us-const-amend4',
-    documentId: 'us-constitution',
-    title: 'Fourth Amendment - Search and Seizure',
-    number: 'Amend. IV',
-    text: 'The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.',
-    canonicalCitation: 'U.S. Const. amend. IV',
-    order: 104
-  },
-  {
-    id: 'us-const-amend10',
-    documentId: 'us-constitution',
-    title: 'Tenth Amendment - Reserved Powers',
-    number: 'Amend. X',
-    text: 'The powers not delegated to the United States by the Constitution, nor prohibited by it to the States, are reserved to the States respectively, or to the people.',
-    canonicalCitation: 'U.S. Const. amend. X',
-    order: 110
-  },
-  {
-    id: 'us-const-amend14',
-    documentId: 'us-constitution',
-    title: 'Fourteenth Amendment - Due Process and Equal Protection',
-    number: 'Amend. XIV',
-    text: 'All persons born or naturalized in the United States, and subject to the jurisdiction thereof, are citizens of the United States and of the State wherein they reside. No State shall make or enforce any law which shall abridge the privileges or immunities of citizens of the United States; nor shall any State deprive any person of life, liberty, or property, without due process of law; nor deny to any person within its jurisdiction the equal protection of the laws.',
-    canonicalCitation: 'U.S. Const. amend. XIV, § 1',
-    order: 114
-  },
+  // ── Complete U.S. Constitution (all Articles + all 27 Amendments) ──
+  ...usConstitutionSections,
+  // ── State Constitution Sections ──
+  // NOTE: Preambles and Art. I §1 contain actual state-specific text.
+  // Sections I.2, I.3, I.4, Art II, Art III, and Local Govt use representative
+  // language typical of state constitutions. Users should verify against the
+  // official source URL for each state's constitution.
   ...stateConstitutionSections(),
   {
     id: 'civil-rights-act-title-vii',
@@ -795,11 +730,12 @@ export const sections: Section[] = [
   }
 ]
 
-export const learningTopics = [
+export const learningTopics: LearningModule[] = [
   {
     id: 'supremacy-clause',
     title: 'The Supremacy Clause',
     category: 'Constitutional Framework',
+    description: 'Understand how the Supremacy Clause establishes the hierarchy of law in the United States.',
     content: `The Supremacy Clause, found in Article VI, Clause 2 of the U.S. Constitution, establishes that federal law is "the supreme Law of the Land." This means that when state or local laws conflict with valid federal law, the federal law prevails.
 
 **Primary Text:**
@@ -817,33 +753,37 @@ The hierarchy of U.S. law follows this order (from highest to lowest authority):
 
 **Important Limitation:**
 Federal law only preempts state/local law in areas where Congress has constitutional authority to act. The Tenth Amendment reserves powers not delegated to the federal government to the states or the people.`,
-    relatedSections: ['us-const-art6', 'us-const-amend10']
+    relatedSectionIds: ['us-const-art6', 'us-const-amend10'],
+    order: 1,
   },
   {
     id: 'preemption-types',
     title: 'Types of Federal Preemption',
     category: 'Constitutional Framework',
+    description: 'Learn how federal law can preempt state and local law through express, conflict, and field preemption.',
     content: `Federal preemption occurs when federal law takes precedence over state or local law. There are several types:
 
 **1. Express Preemption**
 Congress explicitly states in a statute that federal law preempts state law in a particular area.
 
-**2. Implied Preemption - Field Preemption**
+**2. Implied Preemption – Field Preemption**
 Federal regulation is so comprehensive that it occupies the entire field, leaving no room for state law (e.g., immigration law).
 
-**3. Implied Preemption - Conflict Preemption**
+**3. Implied Preemption – Conflict Preemption**
 State law directly conflicts with federal law, making it impossible to comply with both, or state law obstructs federal objectives.
 
 **Example (Hypothetical for Educational Purposes):**
 If a state passes a law requiring food labels that conflict with FDA labeling requirements, the state law would likely be preempted under conflict preemption doctrine.
 
 **Note:** This is educational information, not legal advice. Actual preemption analysis requires examining specific statutes, regulations, and case law.`,
-    relatedSections: ['us-const-art6']
+    relatedSectionIds: ['us-const-art6'],
+    order: 2,
   },
   {
     id: 'incorporation',
     title: 'Incorporation Doctrine',
     category: 'Constitutional Rights',
+    description: 'How the Bill of Rights became applicable to state governments through the Fourteenth Amendment.',
     content: `The Incorporation Doctrine is the legal principle by which the Bill of Rights (the first ten amendments to the U.S. Constitution) applies to state and local governments, not just the federal government.
 
 **Constitutional Basis:**
@@ -854,6 +794,137 @@ Through Supreme Court decisions over many decades, most provisions of the Bill o
 
 **Practical Impact:**
 State constitutions and laws must respect these federal constitutional minimums, though states may provide greater protections under their own constitutions.`,
-    relatedSections: ['us-const-amend14', 'us-const-amend1', 'us-const-amend4']
-  }
+    relatedSectionIds: ['us-const-amend14', 'us-const-amend1', 'us-const-amend4'],
+    order: 3,
+  },
+  {
+    id: 'federalism',
+    title: 'Federalism',
+    category: 'Constitutional Framework',
+    description: 'The division of governmental power between the federal government and the states.',
+    content: `Federalism is the constitutional system that divides governmental power between the national (federal) government and the state governments.
+
+**Constitutional Foundation:**
+The U.S. Constitution enumerates specific powers for the federal government (Article I, Section 8) and reserves all other powers to the states or the people (Tenth Amendment).
+
+**Key Principles:**
+1. **Enumerated Powers**: The federal government possesses only those powers specifically granted by the Constitution.
+2. **Reserved Powers**: Powers not delegated to the federal government are reserved to the states (U.S. Const. amend. X).
+3. **Concurrent Powers**: Some powers (like taxation) are shared between federal and state governments.
+4. **Supremacy**: When federal and state law conflict on a matter within federal authority, federal law prevails (U.S. Const. art. VI, cl. 2).
+
+**Practical Significance:**
+Federalism means that Americans live under two sets of laws — federal and state — each operating within its constitutional sphere. State constitutions are the supreme law within their state, subject to the U.S. Constitution.`,
+    relatedSectionIds: ['us-const-amend10', 'us-const-art1-s8', 'us-const-art6'],
+    order: 4,
+  },
+  {
+    id: 'checks-and-balances',
+    title: 'Checks and Balances',
+    category: 'Constitutional Framework',
+    description: 'How the three branches of government limit each other\'s power.',
+    content: `The system of checks and balances ensures that no single branch of the federal government becomes too powerful. Each branch has specific powers to check the other two.
+
+**The Three Branches:**
+1. **Legislative (Congress)** — Makes laws (U.S. Const. art. I)
+2. **Executive (President)** — Enforces laws (U.S. Const. art. II)
+3. **Judicial (Courts)** — Interprets laws (U.S. Const. art. III)
+
+**Key Checks:**
+- Congress can override a presidential veto with a two-thirds vote
+- The President can veto legislation passed by Congress
+- The Supreme Court can declare laws unconstitutional (judicial review)
+- The Senate confirms presidential appointments (U.S. Const. art. II, § 2)
+- Congress can impeach and remove the President or federal judges (U.S. Const. art. I, § 2–3; art. II, § 4)
+- The President nominates federal judges
+
+**Purpose:**
+James Madison wrote in Federalist No. 51: "Ambition must be made to counteract ambition." The system prevents tyranny by ensuring power is distributed and each branch can limit the others.`,
+    relatedSectionIds: ['us-const-art1', 'us-const-art2', 'us-const-art3', 'us-const-art2-s4'],
+    order: 5,
+  },
+  {
+    id: 'treaty-power',
+    title: 'The Treaty Power',
+    category: 'Federal Authority',
+    description: 'How treaties are made, their legal force, and their place in the hierarchy of law.',
+    content: `Under the U.S. Constitution, the President has the power to make treaties with foreign nations, subject to the advice and consent of the Senate.
+
+**Constitutional Text:**
+"He shall have Power, by and with the Advice and Consent of the Senate, to make Treaties, provided two thirds of the Senators present concur." (U.S. Const. art. II, § 2)
+
+**Legal Status of Treaties:**
+Treaties are part of "the supreme Law of the Land" under the Supremacy Clause (U.S. Const. art. VI, cl. 2). This means:
+- Ratified treaties have the same legal force as federal statutes
+- Treaties can preempt conflicting state laws
+- When a treaty and a federal statute conflict, the later-in-time rule generally applies
+
+**Self-Executing vs. Non-Self-Executing Treaties:**
+- **Self-executing treaties** take effect as domestic law immediately upon ratification
+- **Non-self-executing treaties** require implementing legislation from Congress before they can be enforced in U.S. courts
+
+**Important Note:**
+The U.S. has ratified some international agreements with reservations, declarations, or understandings that may limit their domestic application. Treaty status information on this platform notes these where applicable.`,
+    relatedSectionIds: ['us-const-art2-s2', 'us-const-art6'],
+    order: 6,
+  },
+  {
+    id: 'home-rule',
+    title: 'Home Rule',
+    category: 'State & Local Authority',
+    description: 'How local governments derive and exercise their authority under state constitutions.',
+    content: `Home rule is the power of a local government (city, county, or municipality) to set up its own system of self-governance without receiving a charter from the state legislature.
+
+**Constitutional Basis:**
+Local governments are creatures of state law. Their authority derives from the state constitution and state statutes, not directly from the U.S. Constitution. Many state constitutions include "home rule" provisions that grant local governments varying degrees of self-governance authority.
+
+**Types of Home Rule:**
+1. **Structural Home Rule**: Power to adopt or amend a local charter (organizational structure)
+2. **Functional Home Rule**: Power to exercise broad local government functions
+3. **Fiscal Home Rule**: Power to raise revenue through taxes, fees, and borrowing
+
+**Dillon's Rule vs. Home Rule:**
+- **Dillon's Rule** (traditional): Local governments can exercise only those powers expressly granted by the state legislature
+- **Home Rule**: Local governments may exercise any power not specifically denied by the state constitution or statute
+
+**Limits:**
+Even with home rule, local governments remain subject to:
+- The U.S. Constitution
+- Federal law
+- Their state's constitution
+- State statutes (where applicable)`,
+    relatedSectionIds: ['us-const-amend10'],
+    order: 7,
+  },
+  {
+    id: 'due-process',
+    title: 'Due Process of Law',
+    category: 'Constitutional Rights',
+    description: 'The constitutional guarantee that government must follow fair procedures before depriving individuals of life, liberty, or property.',
+    content: `Due process is guaranteed by two provisions of the U.S. Constitution:
+
+**Fifth Amendment** (applies to the federal government):
+"No person shall be...deprived of life, liberty, or property, without due process of law." (U.S. Const. amend. V)
+
+**Fourteenth Amendment** (applies to state and local governments):
+"...nor shall any State deprive any person of life, liberty, or property, without due process of law." (U.S. Const. amend. XIV, § 1)
+
+**Two Types of Due Process:**
+
+1. **Procedural Due Process**: The government must follow fair procedures before taking action against an individual. This typically includes:
+   - Notice of the government's intended action
+   - An opportunity to be heard
+   - A neutral decision-maker
+
+2. **Substantive Due Process**: Certain fundamental rights are so important that the government cannot infringe upon them regardless of what procedures are used. Courts strictly scrutinize government actions that affect fundamental rights such as:
+   - Right to privacy
+   - Right to marry
+   - Right to travel
+   - Parental rights
+
+**State Constitutional Parallels:**
+Nearly every state constitution contains its own due process clause. State courts may interpret their state's due process protections more broadly than the federal minimum.`,
+    relatedSectionIds: ['us-const-amend5', 'us-const-amend14'],
+    order: 8,
+  },
 ]

@@ -1,24 +1,24 @@
-import { House, Scales, MapPin, Buildings, MagnifyingGlass, GlobeHemisphereWest, ChartBar, GraduationCap, BookmarkSimple } from '@phosphor-icons/react'
+import { House, Scales, MapPin, MagnifyingGlass, ChartBar } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-
-export type TabId = 'home' | 'supreme-law' | 'my-jurisdiction' | 'local' | 'search' | 'treaties' | 'analyzer' | 'learn' | 'citations'
+import type { RouteId } from '@/lib/types'
 
 interface MobileNavProps {
-  activeTab: TabId
-  onTabChange: (tab: TabId) => void
+  activeTab: RouteId
+  onTabChange: (tab: RouteId) => void
 }
 
 export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
-  const tabs = [
-    { id: 'home' as TabId, label: 'Home', icon: House },
-    { id: 'supreme-law' as TabId, label: 'Supreme', icon: Scales },
-    { id: 'my-jurisdiction' as TabId, label: 'My State', icon: MapPin },
-    { id: 'search' as TabId, label: 'Search', icon: MagnifyingGlass },
-    { id: 'analyzer' as TabId, label: 'Analyze', icon: ChartBar },
+  const tabs: { id: RouteId; label: string; icon: typeof House }[] = [
+    { id: 'home', label: 'Home', icon: House },
+    { id: 'supreme-law', label: 'Supreme', icon: Scales },
+    { id: 'my-jurisdiction', label: 'My State', icon: MapPin },
+    { id: 'search', label: 'Search', icon: MagnifyingGlass },
+    { id: 'analyzer', label: 'Analyze', icon: ChartBar },
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:hidden"
+         aria-label="Main navigation">
       <div className="flex items-center justify-around h-16">
         {tabs.map((tab) => {
           const Icon = tab.icon
@@ -33,6 +33,7 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
+              aria-current={isActive ? 'page' : undefined}
             >
               <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
               <span className="text-xs font-medium">{tab.label}</span>

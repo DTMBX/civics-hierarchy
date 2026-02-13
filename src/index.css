@@ -1,83 +1,31 @@
-@import 'tailwindcss';
-@import "tw-animate-css";
+/*
+ * index.css – Civic theme overrides
+ * 
+ * All :root variables are now consolidated in main.css.
+ * This file only contains component-specific style extensions.
+ */
 
-@layer base {
-  * {
-    @apply border-border;
+/* Skip focus outlines on mouse interactions, keep for keyboard */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* High-contrast mode support */
+@media (forced-colors: active) {
+  .badge,
+  .button,
+  [role="tab"] {
+    border: 1px solid ButtonText;
   }
 }
 
-:root {
-  --background: oklch(0.94 0.015 85);
-  --foreground: oklch(0.28 0.01 260);
-
-  --card: oklch(0.99 0 0);
-  --card-foreground: oklch(0.28 0.01 260);
-
-  --popover: oklch(0.99 0 0);
-  --popover-foreground: oklch(0.28 0.01 260);
-
-  --primary: oklch(0.42 0.10 250);
-  --primary-foreground: oklch(0.99 0 0);
-
-  --secondary: oklch(0.88 0.005 260);
-  --secondary-foreground: oklch(0.28 0.01 260);
-
-  --muted: oklch(0.88 0.005 260);
-  --muted-foreground: oklch(0.55 0.01 260);
-
-  --accent: oklch(0.72 0.15 65);
-  --accent-foreground: oklch(0.20 0.01 260);
-
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.99 0 0);
-
-  --border: oklch(0.82 0.005 260);
-  --input: oklch(0.82 0.005 260);
-  --ring: oklch(0.72 0.15 65);
-
-  --radius: 0.5rem;
-  
-  --font-sans: 'Space Grotesk', system-ui, sans-serif;
-  --font-serif: 'Newsreader', Georgia, serif;
-}
-
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
-  --radius-sm: calc(var(--radius) * 0.5);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) * 1.5);
-  --radius-xl: calc(var(--radius) * 2);
-  --radius-2xl: calc(var(--radius) * 3);
-  --radius-full: 9999px;
-  
-  --font-family-sans: var(--font-sans);
-  --font-family-serif: var(--font-serif);
-}
-
-body {
-  font-family: var(--font-sans);
-}
-
-.font-serif {
-  font-family: var(--font-serif);
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

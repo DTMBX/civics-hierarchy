@@ -1,25 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/header'
-import { MobileNav, TabId } from '@/components/mobile-nav'
+import { MobileNav } from '@/components/mobile-nav'
 import { HomeView } from '@/components/views/home-view'
 import { SupremeLawView } from '@/components/views/supreme-law-view'
 import { MyJurisdictionView } from '@/components/views/my-jurisdiction-view'
 import { LocalOverlayView } from '@/components/views/local-overlay-view'
-import { LibraryView } from '@/components/views/library-view'
 import { SearchView } from '@/components/views/search-view'
 import { TreatiesView } from '@/components/views/treaties-view'
 import { AnalyzerView } from '@/components/views/analyzer-view'
 import { LearnView } from '@/components/views/learn-view'
 import { CitationLibraryView } from '@/components/views/citation-library-view'
-import { LocalOrdinanceSubmission } from '@/components/local-ordinance-submission'
 import { SectionDetail } from '@/components/section-detail'
 import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
 import { StickyDisclaimer } from '@/components/disclaimer-banner'
 import { DisclaimerViewer } from '@/components/disclaimer-viewer'
+import { HierarchyLadder } from '@/components/hierarchy-ladder'
+import { BreadcrumbNav } from '@/components/breadcrumb-nav'
+import { SupremeOverlay } from '@/components/supreme-overlay'
 import { jurisdictions, documents, sections } from '@/lib/seed-data'
-import { Section, Bookmark, UserSettings } from '@/lib/types'
+import { Section, Bookmark, UserSettings, RouteId } from '@/lib/types'
+import { useHashRouter, navigateTo } from '@/lib/router'
+import { buildBreadcrumbs } from '@/lib/hierarchy'
+import { initializeSourceRegistry } from '@/lib/source-registry-data'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -28,17 +32,22 @@ import { toast } from 'sonner'
 import { hasAcknowledgedRequiredDisclaimers, createAuditLog } from '@/lib/compliance'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('home')
+  // ── Routing ────────────────────────────────────────────────────────────
+  const { currentRoute, params, navigate } = useHashRouter()
+
+  // ── UI State ───────────────────────────────────────────────────────────
   const [selectedSection, setSelectedSection] = useState<Section | null>(null)
   const [showSectionDetail, setShowSectionDetail] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
   const [disclaimersAccepted, setDisclaimersAccepted] = useState(false)
   const [userId, setUserId] = useState<string>('')
   const [showStickyDisclaimer, setShowStickyDisclaimer] = useState(false)
   const [showDisclaimerViewer, setShowDisclaimerViewer] = useState(false)
+  const [showSupremeOverlay, setShowSupremeOverlay] = useState(false)
+  const [overlaySection, setOverlaySection] = useState<Section | null>(null)
 
+  // ── Persisted State (Spark KV) ─────────────────────────────────────────
   const [settings, setSettings] = useKV<UserSettings>('user-settings', {
     selectedJurisdictionId: 'us-ca',
     secondaryJurisdictionIds: [],
@@ -49,8 +58,39 @@ function App() {
 
   const [bookmarks, setBookmarks] = useKV<Bookmark[]>('bookmarks', [])
 
-  const selectedJurisdiction = jurisdictions.find(j => j.id === (settings?.selectedJurisdictionId || 'us-ca'))
+  const selectedJurisdiction = jurisdictions.find(
+    j => j.id === (settings?.selectedJurisdictionId || 'us-ca')
+  )
 
+  // Determine the active document from the hierarchy ladder
+  const activeDocumentId = useMemo(() => {
+    if (currentRoute === 'section' && params.id) {
+      const sec = sections.find(s => s.id === params.id)
+      return sec?.documentId
+    }
+    if (currentRoute === 'supreme-law') return 'us-constitution'
+    return undefined
+  }, [currentRoute, params])
+
+  // ── Deep-link: auto-open section from URL ──────────────────────────────
+  useEffect(() => {
+    if (currentRoute === 'section' && params.id) {
+      const sec = sections.find(s => s.id === params.id)
+      if (sec) {
+        setSelectedSection(sec)
+        setShowSectionDetail(true)
+      }
+    }
+    if (currentRoute === 'compare' && params.left && params.right) {
+      const stateSection = sections.find(s => s.id === params.right)
+      if (stateSection) {
+        setOverlaySection(stateSection)
+        setShowSupremeOverlay(true)
+      }
+    }
+  }, [currentRoute, params])
+
+  // ── App Initialization ─────────────────────────────────────────────────
   useEffect(() => {
     const initializeApp = async () => {
       const user = await window.spark.user()
@@ -63,6 +103,9 @@ function App() {
       if (!hasAccepted) {
         setShowDisclaimerModal(true)
       }
+
+      // Initialize source registry on first load
+      await initializeSourceRegistry()
 
       await createAuditLog({
         userId: userIdentifier,
@@ -77,14 +120,44 @@ function App() {
     initializeApp()
   }, [])
 
+  // ── Sticky Disclaimer for Analyzer ─────────────────────────────────────
   useEffect(() => {
-    if (activeTab === 'analyzer' && disclaimersAccepted) {
+    if (currentRoute === 'analyzer' && disclaimersAccepted) {
       setShowStickyDisclaimer(true)
     } else {
       setShowStickyDisclaimer(false)
     }
-  }, [activeTab, disclaimersAccepted])
+  }, [currentRoute, disclaimersAccepted])
 
+  // ── Breadcrumbs – built from selected document context ─────────────────
+  const breadcrumbs = useMemo(() => {
+    const routeLabels: Partial<Record<RouteId, string>> = {
+      home: 'Home',
+      'supreme-law': 'Supreme Law',
+      'my-jurisdiction': selectedJurisdiction?.name || 'My Jurisdiction',
+      local: 'Local Authority',
+      search: 'Search',
+      treaties: 'Treaties',
+      analyzer: 'Analyzer',
+      learn: 'Learn',
+      citations: 'Citation Library',
+    }
+
+    if (currentRoute === 'home') return []
+    if (currentRoute === 'section' && selectedSection) {
+      const doc = documents.find(d => d.id === selectedSection.documentId)
+      if (doc) {
+        return buildBreadcrumbs(selectedSection, doc, selectedJurisdiction, documents)
+      }
+    }
+
+    const label = routeLabels[currentRoute]
+    if (label) return [{ label }]
+
+    return []
+  }, [currentRoute, selectedSection, selectedJurisdiction])
+
+  // ── Event Handlers ─────────────────────────────────────────────────────
   const handleJurisdictionChange = (jurisdictionId: string) => {
     setSettings(current => {
       if (!current) return {
@@ -94,10 +167,7 @@ function App() {
         analyticsOptIn: false,
         fontSize: 'medium' as const
       }
-      return {
-        ...current,
-        selectedJurisdictionId: jurisdictionId
-      }
+      return { ...current, selectedJurisdictionId: jurisdictionId }
     })
     toast.success('Jurisdiction updated')
   }
@@ -126,7 +196,6 @@ function App() {
     if (!selectedSection) return
 
     const existingBookmark = (bookmarks || []).find(b => b.sectionId === selectedSection.id)
-    
     if (existingBookmark) {
       toast.info('Section already bookmarked')
       return
@@ -166,11 +235,16 @@ function App() {
   }
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    setActiveTab('search')
+    navigate('search', { q: query })
   }
 
-  const selectedDocument = selectedSection 
+  /** Open Supreme Overlay for a state section */
+  const handleOpenOverlay = (section: Section) => {
+    setOverlaySection(section)
+    setShowSupremeOverlay(true)
+  }
+
+  const selectedDocument = selectedSection
     ? documents.find(d => d.id === selectedSection.documentId)
     : undefined
 
@@ -182,6 +256,7 @@ function App() {
     })
   }
 
+  // ── Pre-Auth Gate ──────────────────────────────────────────────────────
   if (!disclaimersAccepted) {
     return (
       <>
@@ -199,8 +274,9 @@ function App() {
     )
   }
 
+  // ── Main Layout ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header
         selectedJurisdiction={selectedJurisdiction}
         jurisdictions={jurisdictions}
@@ -208,87 +284,152 @@ function App() {
         onSettingsClick={() => setShowSettings(true)}
       />
 
-      <main className="px-4 py-6 md:px-8 pb-24 md:pb-8 max-w-7xl mx-auto">
-        {activeTab === 'home' && (
-          <HomeView
-            selectedJurisdiction={selectedJurisdiction}
-            recentBookmarks={bookmarks || []}
-            onSearch={handleSearch}
-            onNavigateToLibrary={() => setActiveTab('supreme-law')}
-            onNavigateToAnalyzer={() => setActiveTab('analyzer')}
-            onNavigateToBookmark={handleNavigateToBookmark}
-            onNavigateToCitations={() => setActiveTab('citations')}
-          />
-        )}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop Hierarchy Sidebar */}
+        <HierarchyLadder
+          documents={documents}
+          sections={sections}
+          selectedJurisdictionId={settings?.selectedJurisdictionId}
+          activeDocumentId={activeDocumentId}
+          onNavigate={(route, routeParams) =>
+            navigate(route as RouteId, routeParams)
+          }
+        />
 
-        {activeTab === 'supreme-law' && (
-          <SupremeLawView
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-            onNavigateToTreaties={() => setActiveTab('treaties')}
-          />
-        )}
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto">
+          {/* Breadcrumb Trail */}
+          {breadcrumbs.length > 0 && (
+            <div className="px-4 md:px-8 pt-2 max-w-7xl mx-auto">
+              <BreadcrumbNav
+                items={breadcrumbs}
+                onNavigate={(route, routeParams) =>
+                  navigate(route as RouteId, routeParams)
+                }
+              />
+            </div>
+          )}
 
-        {activeTab === 'my-jurisdiction' && (
-          <MyJurisdictionView
-            jurisdiction={selectedJurisdiction}
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-            onChangeJurisdiction={() => setShowSettings(true)}
-          />
-        )}
+          <div className="px-4 py-6 md:px-8 pb-24 md:pb-8 max-w-7xl mx-auto">
+            {currentRoute === 'home' && (
+              <HomeView
+                selectedJurisdiction={selectedJurisdiction}
+                recentBookmarks={bookmarks || []}
+                onSearch={handleSearch}
+                onNavigateToLibrary={() => navigate('supreme-law')}
+                onNavigateToAnalyzer={() => navigate('analyzer')}
+                onNavigateToBookmark={handleNavigateToBookmark}
+                onNavigateToCitations={() => navigate('citations')}
+              />
+            )}
 
-        {activeTab === 'local' && (
-          <LocalOverlayView
-            jurisdiction={selectedJurisdiction}
-          />
-        )}
+            {currentRoute === 'supreme-law' && (
+              <SupremeLawView
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+                onNavigateToTreaties={() => navigate('treaties')}
+              />
+            )}
 
-        {activeTab === 'treaties' && (
-          <TreatiesView
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-          />
-        )}
+            {currentRoute === 'my-jurisdiction' && (
+              <MyJurisdictionView
+                jurisdiction={selectedJurisdiction}
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+                onChangeJurisdiction={() => setShowSettings(true)}
+              />
+            )}
 
-        {activeTab === 'search' && (
-          <SearchView
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-          />
-        )}
+            {currentRoute === 'local' && (
+              <LocalOverlayView
+                jurisdiction={selectedJurisdiction}
+              />
+            )}
 
-        {activeTab === 'analyzer' && (
-          <AnalyzerView
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-          />
-        )}
+            {currentRoute === 'treaties' && (
+              <TreatiesView
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+              />
+            )}
 
-        {activeTab === 'learn' && (
-          <LearnView
-            sections={sections}
-            documents={documents}
-            onSectionSelect={handleSectionSelect}
-          />
-        )}
+            {currentRoute === 'search' && (
+              <SearchView
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+              />
+            )}
 
-        {activeTab === 'citations' && (
-          <CitationLibraryView
-            documents={documents}
-            sections={sections}
-            onSectionSelect={handleSectionSelect}
-          />
-        )}
-      </main>
+            {currentRoute === 'analyzer' && (
+              <AnalyzerView
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+              />
+            )}
 
-      <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+            {currentRoute === 'learn' && (
+              <LearnView
+                sections={sections}
+                documents={documents}
+                onSectionSelect={handleSectionSelect}
+              />
+            )}
 
+            {currentRoute === 'citations' && (
+              <CitationLibraryView
+                documents={documents}
+                sections={sections}
+                onSectionSelect={handleSectionSelect}
+              />
+            )}
+
+            {/* Fallback for section deep link when detail is closed */}
+            {currentRoute === 'section' && !showSectionDetail && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  Section not found or has been closed.{' '}
+                  <button
+                    onClick={() => navigate('home')}
+                    className="text-primary underline"
+                  >
+                    Return home
+                  </button>
+                </p>
+              </div>
+            )}
+
+            {/* Fallback for unrecognized routes */}
+            {!['home', 'supreme-law', 'my-jurisdiction', 'local', 'search',
+              'treaties', 'analyzer', 'learn', 'citations', 'section',
+              'document', 'compare'].includes(currentRoute) && (
+              <div className="text-center py-12">
+                <p className="text-lg font-semibold">Page Not Found</p>
+                <p className="text-muted-foreground mt-1">
+                  <button
+                    onClick={() => navigate('home')}
+                    className="text-primary underline"
+                  >
+                    Return to home
+                  </button>
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Bottom Nav */}
+      <MobileNav
+        activeTab={currentRoute}
+        onTabChange={(tab) => navigate(tab as RouteId)}
+      />
+
+      {/* Section Detail Sheet */}
       <SectionDetail
         section={selectedSection}
         document={selectedDocument}
@@ -299,6 +440,17 @@ function App() {
         onBookmark={handleBookmarkSection}
       />
 
+      {/* Supreme Overlay – Side-by-Side Comparison */}
+      <SupremeOverlay
+        open={showSupremeOverlay}
+        onClose={() => setShowSupremeOverlay(false)}
+        stateSection={overlaySection}
+        allSections={sections}
+        documents={documents}
+        jurisdiction={selectedJurisdiction}
+      />
+
+      {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent>
           <DialogHeader>

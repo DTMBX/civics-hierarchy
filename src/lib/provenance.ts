@@ -1,4 +1,5 @@
 import { SourceRegistryEntry, VersionSnapshot, ProvenancePanel } from './types'
+import { getSourceForDocument } from './source-registry-data'
 
 export interface ProvenanceData {
   sourceRegistry: SourceRegistryEntry[]
@@ -6,32 +7,54 @@ export interface ProvenanceData {
 }
 
 export async function getProvenanceForDocument(documentId: string): Promise<ProvenancePanel | null> {
+  // First try document-specific provenance key
   const provenanceKey = `provenance:${documentId}`
   const data = await window.spark.kv.get<ProvenanceData>(provenanceKey)
   
-  if (!data || !data.sourceRegistry || data.sourceRegistry.length === 0) {
-    return null
+  if (data && data.sourceRegistry && data.sourceRegistry.length > 0) {
+    const primarySource = data.sourceRegistry[0]
+    const latestVersion = data.versionSnapshots?.[0]
+
+    return {
+      sourceRegistryEntry: primarySource,
+      versionSnapshot: latestVersion,
+      retrievalMetadata: {
+        retrievedAt: primarySource.retrievedAt,
+        sourceUrl: primarySource.officialUrl,
+        checksum: primarySource.checksum || 'N/A',
+        parsingMethod: primarySource.retrievalMethod
+      },
+      verificationChain: [{
+        verifiedBy: 'System',
+        verifiedAt: primarySource.retrievedAt,
+        method: primarySource.retrievalMethod,
+        notes: primarySource.curatorJustification || 'Initial verification'
+      }]
+    }
   }
 
-  const primarySource = data.sourceRegistry[0]
-  const latestVersion = data.versionSnapshots?.[0]
-
-  return {
-    sourceRegistryEntry: primarySource,
-    versionSnapshot: latestVersion,
-    retrievalMetadata: {
-      retrievedAt: primarySource.retrievedAt,
-      sourceUrl: primarySource.officialUrl,
-      checksum: primarySource.checksum || 'N/A',
-      parsingMethod: primarySource.retrievalMethod
-    },
-    verificationChain: [{
-      verifiedBy: 'System',
-      verifiedAt: primarySource.retrievedAt,
-      method: primarySource.retrievalMethod,
-      notes: primarySource.curatorJustification || 'Initial verification'
-    }]
+  // Fall back to the pre-populated source registry
+  const registryEntry = getSourceForDocument(documentId)
+  if (registryEntry) {
+    return {
+      sourceRegistryEntry: registryEntry,
+      versionSnapshot: undefined,
+      retrievalMetadata: {
+        retrievedAt: registryEntry.retrievedAt,
+        sourceUrl: registryEntry.officialUrl,
+        checksum: registryEntry.checksum || 'N/A',
+        parsingMethod: registryEntry.retrievalMethod,
+      },
+      verificationChain: [{
+        verifiedBy: 'Curator',
+        verifiedAt: registryEntry.lastVerified || registryEntry.retrievedAt,
+        method: registryEntry.retrievalMethod,
+        notes: registryEntry.curatorJustification || 'Curated from official source',
+      }],
+    }
   }
+
+  return null
 }
 
 export async function createSourceRegistryEntry(
