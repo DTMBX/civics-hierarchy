@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Warning, SealCheck } from '@phosphor-icons/react'
+import { Progress } from '@/components/ui/progress'
+import { Warning, SealCheck, ArrowRight, ArrowLeft } from '@phosphor-icons/react'
 import { LEGAL_DISCLAIMERS, DisclaimerType, recordUserAcknowledgment } from '@/lib/compliance'
 
 interface LegalDisclaimerModalProps {
@@ -22,6 +23,7 @@ interface LegalDisclaimerModalProps {
 }
 
 export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimerModalProps) {
+  const [currentPage, setCurrentPage] = useState(0)
   const [checkedDisclaimers, setCheckedDisclaimers] = useState<Set<DisclaimerType>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -33,20 +35,36 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
     'accuracy-limitation',
   ]
 
-  const allChecked = requiredDisclaimers.every((type) => checkedDisclaimers.has(type))
+  const currentDisclaimerType = requiredDisclaimers[currentPage]
+  const currentDisclaimer = LEGAL_DISCLAIMERS[currentDisclaimerType]
+  const isCurrentChecked = checkedDisclaimers.has(currentDisclaimerType)
+  const isLastPage = currentPage === requiredDisclaimers.length - 1
+  const progressPercentage = ((currentPage + 1) / requiredDisclaimers.length) * 100
 
-  const handleCheckboxChange = (type: DisclaimerType, checked: boolean) => {
+  const handleCheckboxChange = (checked: boolean) => {
     const newSet = new Set(checkedDisclaimers)
     if (checked) {
-      newSet.add(type)
+      newSet.add(currentDisclaimerType)
     } else {
-      newSet.delete(type)
+      newSet.delete(currentDisclaimerType)
     }
     setCheckedDisclaimers(newSet)
   }
 
+  const handleNext = () => {
+    if (isCurrentChecked && !isLastPage) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  const handleBack = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
   const handleAccept = async () => {
-    if (!allChecked) return
+    if (!isCurrentChecked) return
 
     setIsProcessing(true)
     try {
@@ -69,86 +87,106 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
             <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-full">
               <Warning className="w-6 h-6 text-amber-600" weight="fill" />
             </div>
-            <div>
+            <div className="flex-1">
               <DialogTitle className="text-2xl">Important Legal Information</DialogTitle>
               <DialogDescription className="text-base mt-1">
-                Please read and acknowledge these required disclosures before using Civics Stack
+                Disclosure {currentPage + 1} of {requiredDisclaimers.length}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>Progress</span>
+            <span className="font-medium">{currentPage + 1}/{requiredDisclaimers.length}</span>
+          </div>
+          <Progress value={progressPercentage} className="h-2" />
+        </div>
+
         <Alert className="border-amber-200 bg-amber-50">
           <Warning className="h-5 w-5 text-amber-600" />
           <AlertDescription className="text-sm font-medium text-amber-900">
-            You must read and acknowledge all disclosures below to continue. These statements are
+            You must read and acknowledge this disclosure to continue. These statements are
             essential for court-defensible compliance.
           </AlertDescription>
         </Alert>
 
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-6">
-            {requiredDisclaimers.map((type) => {
-              const disclaimer = LEGAL_DISCLAIMERS[type]
-              const isChecked = checkedDisclaimers.has(type)
-
-              return (
-                <div
-                  key={type}
-                  className={`border-2 rounded-lg p-5 transition-colors ${
-                    isChecked ? 'border-primary bg-primary/5' : 'border-border bg-card'
-                  }`}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg font-serif flex items-center gap-2">
-                          {disclaimer.title}
-                          {isChecked && (
-                            <SealCheck className="w-5 h-5 text-primary" weight="fill" />
-                          )}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-2 leading-relaxed whitespace-pre-line">
-                          {disclaimer.content}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 pt-3 border-t">
-                      <Checkbox
-                        id={`disclaimer-${type}`}
-                        checked={isChecked}
-                        onCheckedChange={(checked) =>
-                          handleCheckboxChange(type, checked as boolean)
-                        }
-                      />
-                      <Label
-                        htmlFor={`disclaimer-${type}`}
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        I have read and understand this disclosure
-                      </Label>
-                    </div>
-                  </div>
+        <ScrollArea className="h-[320px] pr-4">
+          <div
+            className={`border-2 rounded-lg p-6 transition-colors ${
+              isCurrentChecked ? 'border-primary bg-primary/5' : 'border-border bg-card'
+            }`}
+          >
+            <div className="space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-xl font-serif flex items-center gap-2">
+                    {currentDisclaimer.title}
+                    {isCurrentChecked && (
+                      <SealCheck className="w-6 h-6 text-primary" weight="fill" />
+                    )}
+                  </h3>
+                  <p className="text-base text-foreground mt-4 leading-relaxed whitespace-pre-line">
+                    {currentDisclaimer.content}
+                  </p>
                 </div>
-              )
-            })}
+              </div>
+
+              <div className="flex items-start gap-3 pt-4 border-t">
+                <Checkbox
+                  id={`disclaimer-${currentDisclaimerType}`}
+                  checked={isCurrentChecked}
+                  onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
+                  className="mt-1"
+                />
+                <Label
+                  htmlFor={`disclaimer-${currentDisclaimerType}`}
+                  className="text-sm font-medium cursor-pointer leading-relaxed"
+                >
+                  I have read and understand this disclosure and acknowledge its importance for legal compliance
+                </Label>
+              </div>
+            </div>
           </div>
         </ScrollArea>
 
-        <DialogFooter className="flex-col sm:flex-row gap-3 border-t pt-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            By accepting, you acknowledge that this is an educational tool and does not provide
-            legal advice.
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 border-t pt-4">
+          <div className="flex gap-2 w-full sm:w-auto order-2 sm:order-1">
+            <Button
+              onClick={handleBack}
+              disabled={currentPage === 0}
+              variant="outline"
+              size="lg"
+              className="flex-1 sm:flex-initial"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
           </div>
-          <Button
-            onClick={handleAccept}
-            disabled={!allChecked || isProcessing}
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            {isProcessing ? 'Processing...' : 'Accept & Continue'}
-          </Button>
+          <div className="flex-1 order-1 sm:order-2" />
+          <div className="flex gap-2 w-full sm:w-auto order-3">
+            {!isLastPage ? (
+              <Button
+                onClick={handleNext}
+                disabled={!isCurrentChecked}
+                size="lg"
+                className="flex-1 sm:flex-initial"
+              >
+                Next
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAccept}
+                disabled={!isCurrentChecked || isProcessing}
+                size="lg"
+                className="flex-1 sm:flex-initial"
+              >
+                {isProcessing ? 'Processing...' : 'Accept & Continue'}
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
