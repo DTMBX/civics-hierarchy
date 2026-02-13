@@ -6,7 +6,8 @@ import { AuthorityBadge, VerificationBadge } from './authority-badge'
 import { SourceVerificationDisplay } from './source-verification-display'
 import { DisclaimerBanner } from './disclaimer-banner'
 import { CitationExportDialog } from './citation-export-dialog'
-import { BookmarkSimple, Copy, ShareNetwork, Check, FileText } from '@phosphor-icons/react'
+import { AddToCitationLibraryDialog } from './add-to-citation-library-dialog'
+import { BookmarkSimple, Copy, ShareNetwork, Check, FileText, FolderOpen } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { generateCourtDefensibleCitation } from '@/lib/compliance'
@@ -25,6 +26,7 @@ export function SectionDetail({ section, document, jurisdiction, userId, open, o
   const [copied, setCopied] = useState(false)
   const [showVerificationDetail, setShowVerificationDetail] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showAddToLibrary, setShowAddToLibrary] = useState(false)
 
   if (!section || !document) return null
 
@@ -120,6 +122,14 @@ export function SectionDetail({ section, document, jurisdiction, userId, open, o
               <FileText size={18} className="mr-2" />
               Export Citation
             </Button>
+            <Button 
+              onClick={() => setShowAddToLibrary(true)} 
+              variant="secondary" 
+              className="flex-1"
+            >
+              <FolderOpen size={18} className="mr-2" />
+              Save to Library
+            </Button>
           </div>
           <div className="flex gap-2">
             {onBookmark && (
@@ -146,6 +156,16 @@ export function SectionDetail({ section, document, jurisdiction, userId, open, o
         jurisdiction={jurisdiction || null}
         userId={userId || 'anonymous'}
       />
+
+      {section && document && jurisdiction && (
+        <AddToCitationLibraryDialog
+          open={showAddToLibrary}
+          onClose={() => setShowAddToLibrary(false)}
+          section={section}
+          document={document}
+          jurisdiction={jurisdiction}
+        />
+      )}
     </Sheet>
   )
 }

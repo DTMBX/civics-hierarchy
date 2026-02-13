@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MagnifyingGlass, BookmarkSimple, ClockCounterClockwise, Books, ChartBar } from '@phosphor-icons/react'
 import { Bookmark, Jurisdiction } from '@/lib/types'
+import { CitationLibraryStats } from '@/components/citation-library-stats'
 import { useState } from 'react'
 
 interface HomeViewProps {
@@ -12,6 +13,7 @@ interface HomeViewProps {
   onNavigateToLibrary: () => void
   onNavigateToAnalyzer: () => void
   onNavigateToBookmark: (bookmark: Bookmark) => void
+  onNavigateToCitations: () => void
 }
 
 export function HomeView({
@@ -20,7 +22,8 @@ export function HomeView({
   onSearch,
   onNavigateToLibrary,
   onNavigateToAnalyzer,
-  onNavigateToBookmark
+  onNavigateToBookmark,
+  onNavigateToCitations
 }: HomeViewProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -150,6 +153,8 @@ export function HomeView({
           </CardHeader>
         </Card>
       </section>
+
+      <CitationLibraryStats onNavigateToCitations={onNavigateToCitations} />
 
       {recentBookmarks.length > 0 && (
         <section className="space-y-4">

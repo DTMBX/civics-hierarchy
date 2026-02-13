@@ -8,6 +8,7 @@ import { LibraryView } from '@/components/views/library-view'
 import { SearchView } from '@/components/views/search-view'
 import { AnalyzerView } from '@/components/views/analyzer-view'
 import { LearnView } from '@/components/views/learn-view'
+import { CitationLibraryView } from '@/components/views/citation-library-view'
 import { LocalOrdinanceSubmission } from '@/components/local-ordinance-submission'
 import { SectionDetail } from '@/components/section-detail'
 import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
@@ -209,6 +210,7 @@ function App() {
             onNavigateToLibrary={() => setActiveTab('library')}
             onNavigateToAnalyzer={() => setActiveTab('analyzer')}
             onNavigateToBookmark={handleNavigateToBookmark}
+            onNavigateToCitations={() => setActiveTab('citations')}
           />
         )}
 
@@ -242,6 +244,14 @@ function App() {
           <LearnView
             sections={sections}
             documents={documents}
+            onSectionSelect={handleSectionSelect}
+          />
+        )}
+
+        {activeTab === 'citations' && (
+          <CitationLibraryView
+            documents={documents}
+            sections={sections}
             onSectionSelect={handleSectionSelect}
           />
         )}

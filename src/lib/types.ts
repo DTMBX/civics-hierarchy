@@ -113,3 +113,31 @@ export interface UserSettings {
   analyticsOptIn: boolean
   fontSize: 'small' | 'medium' | 'large'
 }
+
+export interface SavedCitation {
+  id: string
+  sectionId: string
+  documentId: string
+  jurisdictionId: string
+  title: string
+  canonicalCitation: string
+  tags: string[]
+  notes: string
+  collections: string[]
+  createdAt: string
+  updatedAt: string
+  accessCount: number
+  lastAccessed?: string
+  isFavorite: boolean
+}
+
+export interface CitationCollection {
+  id: string
+  name: string
+  description: string
+  citationIds: string[]
+  color: string
+  createdAt: string
+  updatedAt: string
+  isPublic: boolean
+}
