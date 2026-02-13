@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MagnifyingGlass, BookmarkSimple, ClockCounterClockwise, Books, ChartBar } from '@phosphor-icons/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MagnifyingGlass, BookmarkSimple, ClockCounterClockwise, Books, ChartBar, Warning, Scales, Scroll, GlobeHemisphereWest, ArrowSquareOut } from '@phosphor-icons/react'
 import { Bookmark, Jurisdiction } from '@/lib/types'
 import { CitationLibraryStats } from '@/components/citation-library-stats'
 import { useState } from 'react'
@@ -14,6 +15,9 @@ interface HomeViewProps {
   onNavigateToAnalyzer: () => void
   onNavigateToBookmark: (bookmark: Bookmark) => void
   onNavigateToCitations: () => void
+  onNavigateToCaseLaw?: () => void
+  onNavigateToFederalRegister?: () => void
+  onNavigateToResources?: () => void
 }
 
 export function HomeView({
@@ -23,7 +27,10 @@ export function HomeView({
   onNavigateToLibrary,
   onNavigateToAnalyzer,
   onNavigateToBookmark,
-  onNavigateToCitations
+  onNavigateToCitations,
+  onNavigateToCaseLaw,
+  onNavigateToFederalRegister,
+  onNavigateToResources,
 }: HomeViewProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -153,6 +160,62 @@ export function HomeView({
           </CardHeader>
         </Card>
       </section>
+
+      {/* Live Legal Data APIs */}
+      <section className="space-y-3">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Scales size={20} className="text-primary" weight="duotone" />
+          Live Legal Data
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {onNavigateToCaseLaw && (
+            <Card className="cursor-pointer transition-shadow hover:shadow-md border-primary/20" onClick={onNavigateToCaseLaw}>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Scales size={22} className="text-primary" weight="duotone" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Case Law Search</p>
+                  <p className="text-xs text-muted-foreground">CourtListener — millions of opinions</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {onNavigateToFederalRegister && (
+            <Card className="cursor-pointer transition-shadow hover:shadow-md border-amber-300/30 dark:border-amber-800/30" onClick={onNavigateToFederalRegister}>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
+                  <Scroll size={22} className="text-amber-700 dark:text-amber-400" weight="duotone" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Federal Register</p>
+                  <p className="text-xs text-muted-foreground">Executive orders, rules & regs</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {onNavigateToResources && (
+            <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={onNavigateToResources}>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="p-2 rounded-lg bg-green-100">
+                  <GlobeHemisphereWest size={22} className="text-green-700" weight="duotone" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Legal Resources</p>
+                  <p className="text-xs text-muted-foreground">16+ free research databases</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </section>
+
+      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
+        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
+        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+          <strong>Educational Resource Only.</strong> This platform provides access to constitutional and statutory text for educational purposes. It does not constitute legal advice, create an attorney-client relationship, or substitute for consultation with a licensed attorney. All source text should be independently verified against official government publications.
+        </AlertDescription>
+      </Alert>
 
       <CitationLibraryStats onNavigateToCitations={onNavigateToCitations} />
 

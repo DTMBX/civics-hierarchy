@@ -249,37 +249,52 @@ export async function recordUserAcknowledgment(
   userId: string,
   disclaimerType: DisclaimerType
 ): Promise<void> {
-  const acknowledgments =
-    (await window.spark.kv.get<Record<string, string[]>>('disclaimer-acknowledgments')) || {}
+  try {
+    const acknowledgments =
+      (await window.spark.kv.get<Record<string, string[]>>('disclaimer-acknowledgments')) || {}
 
-  if (!acknowledgments[userId]) {
-    acknowledgments[userId] = []
+    if (!acknowledgments[userId]) {
+      acknowledgments[userId] = []
+    }
+
+    // Only store one entry per disclaimer type per user (avoid unbounded growth)
+    const alreadyAcknowledged = acknowledgments[userId].some(ack =>
+      ack.startsWith(`${disclaimerType}:`)
+    )
+
+    if (!alreadyAcknowledged) {
+      const acknowledgmentRecord = `${disclaimerType}:${new Date().toISOString()}`
+      acknowledgments[userId].push(acknowledgmentRecord)
+      await window.spark.kv.set('disclaimer-acknowledgments', acknowledgments)
+    }
+
+    await createAuditLog({
+      userId,
+      userRole: 'reader',
+      action: 'view',
+      entityType: 'disclaimer',
+      entityId: disclaimerType,
+      metadata: { acknowledged: true },
+    })
+  } catch (error) {
+    console.error('Failed to record acknowledgment:', error)
+    // Don't throw — allow the user to continue even if KV write fails
   }
-
-  const acknowledgmentRecord = `${disclaimerType}:${new Date().toISOString()}`
-  if (!acknowledgments[userId].includes(acknowledgmentRecord)) {
-    acknowledgments[userId].push(acknowledgmentRecord)
-    await window.spark.kv.set('disclaimer-acknowledgments', acknowledgments)
-  }
-
-  await createAuditLog({
-    userId,
-    userRole: 'reader',
-    action: 'view',
-    entityType: 'disclaimer',
-    entityId: disclaimerType,
-    metadata: { acknowledged: true },
-  })
 }
 
 export async function hasAcknowledgedRequiredDisclaimers(
   userId: string
 ): Promise<boolean> {
-  const acknowledgments =
-    (await window.spark.kv.get<Record<string, string[]>>('disclaimer-acknowledgments')) || {}
-  const userAcknowledgments = acknowledgments[userId] || []
+  try {
+    const acknowledgments =
+      (await window.spark.kv.get<Record<string, string[]>>('disclaimer-acknowledgments')) || {}
+    const userAcknowledgments = acknowledgments[userId] || []
 
-  return COMPLIANCE_STANDARDS.REQUIRED_DISCLAIMERS.every((disclaimerType) =>
-    userAcknowledgments.some((ack) => ack.startsWith(`${disclaimerType}:`))
-  )
+    return COMPLIANCE_STANDARDS.REQUIRED_DISCLAIMERS.every((disclaimerType) =>
+      userAcknowledgments.some((ack) => ack.startsWith(`${disclaimerType}:`))
+    )
+  } catch (error) {
+    console.error('Failed to check acknowledgments:', error)
+    return false
+  }
 }

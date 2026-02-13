@@ -82,9 +82,13 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
 
   useEffect(() => {
     const getUser = async () => {
-      const user = await window.spark.user()
-      const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
-      setUserId(userIdentifier)
+      try {
+        const user = await window.spark.user()
+        const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
+        setUserId(userIdentifier)
+      } catch {
+        setUserId(`anonymous-${Date.now()}`)
+      }
     }
     getUser()
   }, [])

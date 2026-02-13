@@ -157,13 +157,13 @@ export function SectionDetail({ section, document, jurisdiction, userId, open, o
         userId={userId || 'anonymous'}
       />
 
-      {section && document && jurisdiction && (
+      {section && document && (
         <AddToCitationLibraryDialog
           open={showAddToLibrary}
           onClose={() => setShowAddToLibrary(false)}
           section={section}
           document={document}
-          jurisdiction={jurisdiction}
+          jurisdiction={jurisdiction || { id: 'us-federal', name: 'United States (Federal)', type: 'federal' as const, abbreviation: 'US' }}
         />
       )}
     </Sheet>

@@ -70,11 +70,11 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
       return
     }
 
-    const user = await window.spark.user()
+    const user = await window.spark.user().catch(() => null)
     const userId = user?.login || String(user?.id) || 'anonymous'
 
     const newSubmission: LocalSubmission = {
-      id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,  
       documentTitle: formData.documentTitle,
       jurisdictionId: jurisdiction?.id || 'us-federal',
       sourceUrl: formData.sourceUrl,
@@ -107,7 +107,7 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
       case 'verified':
         return <CheckCircle weight="fill" className="text-green-600" />
       case 'unverified':
-        return <Clock weight="fill" className="text-amber-600" />
+        return <Clock weight="fill" className="text-amber-600 dark:text-amber-400" />
       default:
         return <XCircle weight="fill" className="text-muted-foreground" />
     }
@@ -140,9 +140,9 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
         </div>
       </div>
 
-      <Alert className="border-amber-500/50 bg-amber-50">
-        <ShieldWarning className="text-amber-600" />
-        <AlertDescription className="text-sm text-amber-900">
+      <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950">
+        <ShieldWarning className="text-amber-600 dark:text-amber-400" />
+        <AlertDescription className="text-sm text-amber-900 dark:text-amber-200">
           <strong>Verification Standards:</strong> Local ordinances are verified by curators to ensure
           accuracy and proper sourcing. Unverified submissions are hidden by default and should not be
           relied upon for legal purposes without independent verification.
@@ -186,7 +186,7 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
               <Clock size={14} weight="fill" />
               Unverified
             </CardDescription>
-            <CardTitle className="text-3xl font-bold text-amber-600">
+            <CardTitle className="text-3xl font-bold text-amber-600 dark:text-amber-400">
               {unverifiedCount}
             </CardTitle>
           </CardHeader>
@@ -223,9 +223,9 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
             </DialogHeader>
 
             <div className="space-y-4">
-              <Alert className="border-amber-500/50 bg-amber-50">
-                <Warning className="text-amber-600" />
-                <AlertDescription className="text-sm text-amber-900">
+              <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950">
+                <Warning className="text-amber-600 dark:text-amber-400" />
+                <AlertDescription className="text-sm text-amber-900 dark:text-amber-200">
                   <strong>Required:</strong> You must provide a link to an official government source.
                   Personal documents, screenshots, or unofficial summaries will not be accepted.
                 </AlertDescription>
@@ -331,7 +331,7 @@ export function LocalOverlayView({ jurisdiction, onViewDocument }: LocalOverlayV
               <Card
                 key={submission.id}
                 className={`cursor-pointer hover:border-primary/50 transition-colors ${
-                  submission.verificationStatus === 'unverified' ? 'border-amber-500/30 bg-amber-50/30' : ''
+                  submission.verificationStatus === 'unverified' ? 'border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/30' : ''
                 }`}
                 onClick={() => onViewDocument?.(submission.id)}
               >

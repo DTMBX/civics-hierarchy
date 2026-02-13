@@ -1,34 +1,14 @@
-import { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu'
-import { Warning, SealCheck, ArrowRight, ArrowLeft, DownloadSimple, Printer, FileText } from '@phosphor-icons/react'
+import { Warning, SealCheck, ArrowRight, ArrowLeft, DownloadSimple } from '@phosphor-icons/react'
 import { LEGAL_DISCLAIMERS, DisclaimerType, recordUserAcknowledgment } from '@/lib/compliance'
 import {
   generateDisclaimerDocument,
   downloadDisclaimer,
-  printDisclaimer,
-  copyToClipboard,
-  getAllDisclaimerTypes,
 } from '@/lib/disclaimer-export'
 import { toast } from 'sonner'
 
@@ -38,83 +18,92 @@ interface LegalDisclaimerModalProps {
   userId: string
 }
 
+const REQUIRED_DISCLAIMERS: DisclaimerType[] = [
+  'not-legal-advice',
+  'educational-only',
+  'no-attorney-client',
+  'verify-sources',
+  'accuracy-limitation',
+]
+
 export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimerModalProps) {
   const [currentPage, setCurrentPage] = useState(0)
   const [checkedDisclaimers, setCheckedDisclaimers] = useState<Set<DisclaimerType>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
-  const [scrolledToBottom, setScrolledToBottom] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  const requiredDisclaimers: DisclaimerType[] = [
-    'not-legal-advice',
-    'educational-only',
-    'no-attorney-client',
-    'verify-sources',
-    'accuracy-limitation',
-  ]
-
-  const currentDisclaimerType = requiredDisclaimers[currentPage]
+  const currentDisclaimerType = REQUIRED_DISCLAIMERS[currentPage]
   const currentDisclaimer = LEGAL_DISCLAIMERS[currentDisclaimerType]
   const isCurrentChecked = checkedDisclaimers.has(currentDisclaimerType)
-  const isLastPage = currentPage === requiredDisclaimers.length - 1
-  const progressPercentage = ((currentPage + 1) / requiredDisclaimers.length) * 100
+  const isLastPage = currentPage === REQUIRED_DISCLAIMERS.length - 1
+  const allChecked = REQUIRED_DISCLAIMERS.every(d => checkedDisclaimers.has(d))
+  const progressPercentage = (checkedDisclaimers.size / REQUIRED_DISCLAIMERS.length) * 100
 
+  // Scroll content to top when page changes
   useEffect(() => {
-    setScrolledToBottom(false)
+    scrollRef.current?.scrollTo({ top: 0 })
   }, [currentPage])
 
-  const handleCheckboxChange = (checked: boolean) => {
-    const newSet = new Set(checkedDisclaimers)
-    if (checked) {
-      newSet.add(currentDisclaimerType)
-      
-      if (!isLastPage) {
-        setTimeout(() => {
-          setCurrentPage(currentPage + 1)
-        }, 400)
-      }
-    } else {
-      newSet.delete(currentDisclaimerType)
-    }
-    setCheckedDisclaimers(newSet)
-  }
+  const handleCheckboxChange = useCallback(
+    (checked: boolean) => {
+      setCheckedDisclaimers(prev => {
+        const next = new Set(prev)
+        if (checked) {
+          next.add(currentDisclaimerType)
+        } else {
+          next.delete(currentDisclaimerType)
+        }
+        return next
+      })
+    },
+    [currentDisclaimerType]
+  )
 
-  const handleBack = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1)
+  const handleNext = useCallback(() => {
+    if (currentPage < REQUIRED_DISCLAIMERS.length - 1) {
+      setCurrentPage(p => p + 1)
     }
-  }
+  }, [currentPage])
+
+  const handleBack = useCallback(() => {
+    if (currentPage > 0) {
+      setCurrentPage(p => p - 1)
+    }
+  }, [currentPage])
 
   const handleAccept = async () => {
-    if (!isCurrentChecked) return
-
+    if (!allChecked) return
     setIsProcessing(true)
     try {
-      for (const disclaimerType of requiredDisclaimers) {
-        await recordUserAcknowledgment(userId, disclaimerType)
+      for (const dt of REQUIRED_DISCLAIMERS) {
+        await recordUserAcknowledgment(userId, dt)
       }
       onAccept()
     } catch (error) {
       console.error('Error recording acknowledgments:', error)
+      toast.error('Failed to save acknowledgments. Please try again.')
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLDivElement
-    const scrollThreshold = 20
-    const isAtBottom = target.scrollHeight - target.scrollTop - target.clientHeight < scrollThreshold
-    setScrolledToBottom(isAtBottom)
+  // ── Safe export helper ─────────────────────────────────────────────────
+  const safeGetUser = async () => {
+    try {
+      return await window.spark?.user?.()
+    } catch {
+      return null
+    }
   }
 
   const handleExport = async (format: 'html' | 'markdown' | 'text') => {
     try {
-      const user = await window.spark.user()
-      const content = generateDisclaimerDocument(requiredDisclaimers, {
+      const user = await safeGetUser()
+      const content = generateDisclaimerDocument(REQUIRED_DISCLAIMERS, {
         format,
         includeMetadata: true,
         includeTimestamp: true,
-        userId: userId,
+        userId,
         userName: user?.login,
       })
       downloadDisclaimer(content, format)
@@ -125,202 +114,193 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
     }
   }
 
-  const handlePrint = async () => {
-    try {
-      const user = await window.spark.user()
-      const content = generateDisclaimerDocument(requiredDisclaimers, {
-        format: 'html',
-        includeMetadata: true,
-        includeTimestamp: true,
-        userId: userId,
-        userName: user?.login,
-      })
-      printDisclaimer(content)
-      toast.success('Opening print dialog...')
-    } catch (error) {
-      toast.error('Failed to print disclaimers')
-      console.error('Print error:', error)
-    }
-  }
-
-  const handleCopyText = async () => {
-    try {
-      const user = await window.spark.user()
-      const content = generateDisclaimerDocument(requiredDisclaimers, {
-        format: 'text',
-        includeMetadata: true,
-        includeTimestamp: true,
-        userId: userId,
-        userName: user?.login,
-      })
-      await copyToClipboard(content)
-      toast.success('Disclaimers copied to clipboard')
-    } catch (error) {
-      toast.error('Failed to copy to clipboard')
-      console.error('Copy error:', error)
-    }
-  }
+  if (!open) return null
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent 
-        className="max-w-4xl w-[95vw] h-[95vh] max-h-[900px] flex flex-col p-0" 
-        onPointerDownOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-14 h-14 bg-amber-100 rounded-xl shrink-0">
-              <Warning className="w-7 h-7 text-amber-600" weight="fill" />
+    <DialogPrimitive.Root open={open}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+          onPointerDownOutside={e => e.preventDefault()}
+          onEscapeKeyDown={e => e.preventDefault()}
+          onInteractOutside={e => e.preventDefault()}
+          aria-describedby="disclaimer-desc"
+        >
+          <div className="bg-background border rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden" style={{ maxHeight: 'min(92vh, 720px)' }}>
+            {/* ── Header ──────────────────────────────────────────── */}
+            <div className="px-5 pt-5 pb-4 border-b bg-card shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg shrink-0 mt-0.5">
+                  <Warning className="w-5 h-5 text-amber-600 dark:text-amber-400" weight="fill" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <DialogPrimitive.Title className="text-lg sm:text-xl font-serif font-semibold tracking-tight">
+                    Important Legal Information
+                  </DialogPrimitive.Title>
+                  <p id="disclaimer-desc" className="text-sm text-muted-foreground mt-0.5">
+                    Please review each disclosure before continuing
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="mt-4 space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    Disclosure {currentPage + 1} of {REQUIRED_DISCLAIMERS.length}
+                  </span>
+                  <span className="font-medium">
+                    {checkedDisclaimers.size} / {REQUIRED_DISCLAIMERS.length} acknowledged
+                  </span>
+                </div>
+                <Progress value={progressPercentage} className="h-1.5" />
+
+                {/* Page dots for quick navigation */}
+                <div className="flex items-center gap-1.5 pt-1">
+                  {REQUIRED_DISCLAIMERS.map((dt, i) => (
+                    <button
+                      key={dt}
+                      onClick={() => setCurrentPage(i)}
+                      aria-label={`Go to disclosure ${i + 1}: ${LEGAL_DISCLAIMERS[dt].title}`}
+                      className={`h-2 rounded-full transition-all duration-200 focus-visible:outline-2 focus-visible:outline-primary ${
+                        i === currentPage
+                          ? 'w-6 bg-primary'
+                          : checkedDisclaimers.has(dt)
+                            ? 'w-2 bg-primary/50'
+                            : 'w-2 bg-muted-foreground/25'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-2xl md:text-3xl font-serif">Important Legal Information</DialogTitle>
-              <DialogDescription className="text-base mt-1.5">
-                Disclosure {currentPage + 1} of {requiredDisclaimers.length}
-              </DialogDescription>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 shrink-0">
-                  <DownloadSimple className="w-4 h-4" />
-                  <span className="hidden sm:inline">Export</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Export All Disclaimers</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleExport('html')} className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Download as HTML
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('markdown')} className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Download as Markdown
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('text')} className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Download as Text
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handlePrint} className="gap-2">
-                  <Printer className="w-4 h-4" />
-                  Print Disclaimers
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyText} className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Copy as Text
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </DialogHeader>
 
-        <div className="px-6 py-4 border-b shrink-0 space-y-3">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span className="font-medium">Progress</span>
-            <span className="font-semibold text-foreground">{currentPage + 1} / {requiredDisclaimers.length}</span>
-          </div>
-          <Progress value={progressPercentage} className="h-2.5" />
-        </div>
-
-        <Alert className="mx-6 mt-4 border-amber-300 bg-amber-50 shrink-0">
-          <Warning className="h-5 w-5 text-amber-600" weight="fill" />
-          <AlertDescription className="text-sm font-medium text-amber-900 leading-relaxed">
-            Please read the disclosure carefully and scroll to the bottom. Check the box to acknowledge and automatically proceed to the next disclosure.
-          </AlertDescription>
-        </Alert>
-
-        <div className="flex-1 overflow-hidden px-6 py-4">
-          <ScrollArea className="h-full pr-4" onScrollCapture={handleScroll}>
+            {/* ── Scrollable Content ─────────────────────────────── */}
             <div
-              className={`border-2 rounded-xl p-6 md:p-8 transition-all duration-300 ${
-                isCurrentChecked 
-                  ? 'border-primary bg-primary/5 shadow-lg' 
-                  : 'border-border bg-card'
-              }`}
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 min-h-0"
             >
-              <div className="space-y-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-2xl md:text-3xl font-serif flex items-center gap-3 flex-wrap">
-                      {currentDisclaimer.title}
-                      {isCurrentChecked && (
-                        <SealCheck className="w-7 h-7 text-primary shrink-0 animate-in zoom-in-50" weight="fill" />
-                      )}
-                    </h3>
-                    <div className="mt-6 prose prose-base max-w-none">
-                      <p className="text-base md:text-lg text-foreground leading-relaxed whitespace-pre-line">
-                        {currentDisclaimer.content}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 pt-6 border-t-2">
-                  <Checkbox
-                    id={`disclaimer-${currentDisclaimerType}`}
-                    checked={isCurrentChecked}
-                    onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
-                    className="mt-1.5 h-5 w-5"
-                    disabled={!scrolledToBottom && currentDisclaimer.content.length > 500}
-                  />
-                  <Label
-                    htmlFor={`disclaimer-${currentDisclaimerType}`}
-                    className="text-sm md:text-base font-medium cursor-pointer leading-relaxed flex-1"
-                  >
-                    I have read and understand this disclosure in full and acknowledge its importance for legal compliance and court-defensible documentation
-                  </Label>
-                </div>
-                
-                {!scrolledToBottom && currentDisclaimer.content.length > 500 && !isCurrentChecked && (
-                  <Alert className="border-blue-300 bg-blue-50">
-                    <AlertDescription className="text-sm text-blue-900">
-                      Please scroll to the bottom to enable the acknowledgment checkbox.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </div>
-          </ScrollArea>
-        </div>
-
-        <DialogFooter className="px-6 py-4 border-t shrink-0 flex-row justify-between items-center gap-3">
-          <Button
-            onClick={handleBack}
-            disabled={currentPage === 0}
-            variant="outline"
-            size="lg"
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          
-          <div className="flex items-center gap-3">
-            {isLastPage && (
-              <Button
-                onClick={handleAccept}
-                disabled={!isCurrentChecked || isProcessing}
-                size="lg"
-                className="gap-2 min-w-[180px]"
+              <div
+                className={`border-2 rounded-lg p-4 sm:p-6 transition-colors duration-200 ${
+                  isCurrentChecked
+                    ? 'border-primary/40 bg-primary/5'
+                    : 'border-border bg-card'
+                }`}
               >
-                {isProcessing ? (
-                  'Processing...'
-                ) : (
-                  <>
-                    Accept & Continue
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            )}
-            {!isLastPage && isCurrentChecked && (
-              <div className="text-sm text-muted-foreground italic">
-                Advancing to next disclosure...
+                <h3 className="font-bold text-base sm:text-lg font-serif flex items-center gap-2 flex-wrap">
+                  {currentDisclaimer.title}
+                  {isCurrentChecked && (
+                    <SealCheck className="w-5 h-5 text-primary shrink-0" weight="fill" />
+                  )}
+                </h3>
+
+                <div className="mt-3 text-sm sm:text-[15px] text-foreground/90 leading-relaxed whitespace-pre-line">
+                  {currentDisclaimer.content}
+                </div>
+
+                {/* Metadata */}
+                <div className="mt-4 pt-3 border-t text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+                  <span>ID: {currentDisclaimer.id}</span>
+                  <span>v{currentDisclaimer.version}</span>
+                  <span>Effective: {currentDisclaimer.effectiveDate}</span>
+                </div>
               </div>
-            )}
+
+              {/* Acknowledgment checkbox */}
+              <label
+                htmlFor={`ack-${currentDisclaimerType}`}
+                className="flex items-start gap-3 mt-4 p-3 rounded-lg bg-muted/50 border cursor-pointer hover:bg-muted/70 transition-colors"
+              >
+                <Checkbox
+                  id={`ack-${currentDisclaimerType}`}
+                  checked={isCurrentChecked}
+                  onCheckedChange={checked => handleCheckboxChange(checked as boolean)}
+                  className="mt-0.5 h-5 w-5 shrink-0"
+                />
+                <span className="text-sm leading-relaxed select-none">
+                  I have read and understand this disclosure
+                </span>
+              </label>
+            </div>
+
+            {/* ── Footer ─────────────────────────────────────────── */}
+            <div className="px-5 py-3 border-t bg-card shrink-0">
+              <div className="flex items-center justify-between gap-2">
+                {/* Left: Back + Export */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    onClick={handleBack}
+                    disabled={currentPage === 0}
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Back</span>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-muted-foreground"
+                    onClick={() => handleExport('text')}
+                    title="Export all disclaimers as text file"
+                  >
+                    <DownloadSimple className="w-4 h-4" />
+                    <span className="hidden sm:inline text-xs">Save</span>
+                  </Button>
+                </div>
+
+                {/* Right: Next / Accept */}
+                <div className="flex items-center gap-2">
+                  {!isLastPage && (
+                    <Button
+                      onClick={handleNext}
+                      disabled={!isCurrentChecked}
+                      size="sm"
+                      className="gap-1.5 min-w-[90px]"
+                    >
+                      Next
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {isLastPage && (
+                    <Button
+                      onClick={handleAccept}
+                      disabled={!allChecked || isProcessing}
+                      size="sm"
+                      className="gap-1.5 min-w-[150px]"
+                    >
+                      {isProcessing ? (
+                        'Processing...'
+                      ) : (
+                        <>
+                          <SealCheck className="w-4 h-4" weight="fill" />
+                          Accept & Continue
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Contextual hints */}
+              {!isCurrentChecked && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Check the box above to continue
+                </p>
+              )}
+              {isLastPage && !allChecked && isCurrentChecked && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 text-center mt-2">
+                  You still have unacknowledged disclosures — use the dots above to review them
+                </p>
+              )}
+            </div>
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }

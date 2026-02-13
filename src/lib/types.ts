@@ -104,6 +104,9 @@ export type RouteId =
   | 'section'
   | 'document'
   | 'compare'
+  | 'case-law'
+  | 'federal-register'
+  | 'legal-resources'
 
 export interface RouteState {
   route: RouteId

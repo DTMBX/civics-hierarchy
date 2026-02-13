@@ -117,20 +117,25 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
     setReport(newReport)
     setStep(questions.length)
 
-    const user = await window.spark.user()
-    const userId = user?.login || String(user?.id || '') || 'anonymous'
+    let userId = 'anonymous'
+    try {
+      const user = await window.spark.user()
+      userId = user?.login || String(user?.id || '') || 'anonymous'
+    } catch { /* Spark auth unavailable */ }
     
-    await createAuditLog({
-      userId,
-      userRole: 'reader',
-      action: 'create',
-      entityType: 'analyzer-report',
-      entityId: `report-${Date.now()}`,
-      metadata: { 
-        answers,
-        timestamp: new Date().toISOString()
-      },
-    })
+    try {
+      await createAuditLog({
+        userId,
+        userRole: 'reader',
+        action: 'create',
+        entityType: 'analyzer-report',
+        entityId: `report-${Date.now()}`,
+        metadata: { 
+          answers,
+          timestamp: new Date().toISOString()
+        },
+      })
+    } catch { /* Audit log write failed — non-blocking */ }
   }
 
   const getPreemptionCategories = (answers: Record<string, string>) => {
@@ -178,12 +183,12 @@ export function AnalyzerView({ documents, sections, onSectionSelect }: AnalyzerV
 
         <DisclaimerBanner variant="legal-advice" showIcon={true} />
 
-        <Alert className="border-2 border-amber-500 bg-amber-50">
-          <Scales className="h-6 w-6 text-amber-700" weight="fill" />
-          <AlertTitle className="text-lg font-bold text-amber-900">
+        <Alert className="border-2 border-amber-500 bg-amber-50 dark:bg-amber-950">
+          <Scales className="h-6 w-6 text-amber-700 dark:text-amber-400" weight="fill" />
+          <AlertTitle className="text-lg font-bold text-amber-900 dark:text-amber-200">
             Critical: Not Legal Advice - Educational Tool Only
           </AlertTitle>
-          <AlertDescription className="text-sm text-amber-900 leading-relaxed mt-2">
+          <AlertDescription className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed mt-2">
             {report.disclaimer}
           </AlertDescription>
         </Alert>

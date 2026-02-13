@@ -34,7 +34,7 @@ export function LocalOrdinanceSubmission() {
       return
     }
 
-    const user = await window.spark.user()
+    const user = await window.spark.user().catch(() => null)
 
     const newSubmission: LocalSubmission = {
       id: `submission-${Date.now()}`,

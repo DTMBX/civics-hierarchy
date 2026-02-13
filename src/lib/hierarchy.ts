@@ -141,7 +141,6 @@ export function buildBreadcrumbs(
     if (document.type === 'constitution') {
       // Within the US Constitution
       if (section.parentSectionId) {
-        const parent = documents.length > 0 ? undefined : undefined // placeholder
         crumbs.push({ label: document.title, route: 'supreme-law' })
       }
     } else if (document.type === 'treaty') {

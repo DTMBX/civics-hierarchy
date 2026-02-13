@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MagnifyingGlass, Funnel } from '@phosphor-icons/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MagnifyingGlass, Funnel, Warning } from '@phosphor-icons/react'
 import { Section, Document, AuthorityLevel, DocumentType } from '@/lib/types'
 import { AuthorityBadge } from '../authority-badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -253,6 +254,13 @@ export function SearchView({ documents, sections, onSectionSelect }: SearchViewP
           </CardContent>
         </Card>
       )}
+
+      <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
+        <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
+        <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+          <strong>Verify All Sources.</strong> Search results are drawn from curated educational databases. Source text may not reflect the most recent amendments or judicial interpretations. Always verify results against official government publications before relying on them for any purpose.
+        </AlertDescription>
+      </Alert>
     </div>
   )
 }

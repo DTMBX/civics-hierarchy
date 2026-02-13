@@ -210,3 +210,46 @@
     font-family: var(--font-serif);
   }
 }
+
+/* ── Print Styles ─────────────────────────────────────────────────────── */
+@media print {
+  header,
+  nav[aria-label="Mobile navigation"],
+  [data-hierarchy-ladder],
+  [data-sonner-toaster],
+  [data-sticky-disclaimer],
+  .mobile-nav,
+  button {
+    display: none !important;
+  }
+
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #555;
+  }
+
+  .shadow, .shadow-sm, .shadow-md, .shadow-lg {
+    box-shadow: none !important;
+  }
+}

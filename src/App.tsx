@@ -1,17 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react'
 import { useKV } from '@github/spark/hooks'
+import { Warning } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/header'
 import { MobileNav } from '@/components/mobile-nav'
-import { HomeView } from '@/components/views/home-view'
-import { SupremeLawView } from '@/components/views/supreme-law-view'
-import { MyJurisdictionView } from '@/components/views/my-jurisdiction-view'
-import { LocalOverlayView } from '@/components/views/local-overlay-view'
-import { SearchView } from '@/components/views/search-view'
-import { TreatiesView } from '@/components/views/treaties-view'
-import { AnalyzerView } from '@/components/views/analyzer-view'
-import { LearnView } from '@/components/views/learn-view'
-import { CitationLibraryView } from '@/components/views/citation-library-view'
 import { SectionDetail } from '@/components/section-detail'
 import { LegalDisclaimerModal } from '@/components/legal-disclaimer-modal'
 import { StickyDisclaimer } from '@/components/disclaimer-banner'
@@ -30,6 +22,28 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { hasAcknowledgedRequiredDisclaimers, createAuditLog } from '@/lib/compliance'
+
+// ── Lazy-loaded views (code-split per route) ────────────────────────────
+const HomeView = lazy(() => import('@/components/views/home-view').then(m => ({ default: m.HomeView })))
+const SupremeLawView = lazy(() => import('@/components/views/supreme-law-view').then(m => ({ default: m.SupremeLawView })))
+const MyJurisdictionView = lazy(() => import('@/components/views/my-jurisdiction-view').then(m => ({ default: m.MyJurisdictionView })))
+const LocalOverlayView = lazy(() => import('@/components/views/local-overlay-view').then(m => ({ default: m.LocalOverlayView })))
+const SearchView = lazy(() => import('@/components/views/search-view').then(m => ({ default: m.SearchView })))
+const TreatiesView = lazy(() => import('@/components/views/treaties-view').then(m => ({ default: m.TreatiesView })))
+const AnalyzerView = lazy(() => import('@/components/views/analyzer-view').then(m => ({ default: m.AnalyzerView })))
+const LearnView = lazy(() => import('@/components/views/learn-view').then(m => ({ default: m.LearnView })))
+const CitationLibraryView = lazy(() => import('@/components/views/citation-library-view').then(m => ({ default: m.CitationLibraryView })))
+const CaseLawSearchView = lazy(() => import('@/components/views/case-law-view').then(m => ({ default: m.CaseLawSearchView })))
+const FederalRegisterView = lazy(() => import('@/components/views/federal-register-view').then(m => ({ default: m.FederalRegisterView })))
+const LegalResourcesView = lazy(() => import('@/components/views/legal-resources-view').then(m => ({ default: m.LegalResourcesView })))
+
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+    </div>
+  )
+}
 
 function App() {
   // ── Routing ────────────────────────────────────────────────────────────
@@ -90,31 +104,41 @@ function App() {
     }
   }, [currentRoute, params])
 
+  const [initFailed, setInitFailed] = useState(false)
+
   // ── App Initialization ─────────────────────────────────────────────────
   useEffect(() => {
     const initializeApp = async () => {
-      const user = await window.spark.user()
-      const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
-      setUserId(userIdentifier)
+      try {
+        const user = await window.spark.user()
+        const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
+        setUserId(userIdentifier)
 
-      const hasAccepted = await hasAcknowledgedRequiredDisclaimers(userIdentifier)
-      setDisclaimersAccepted(hasAccepted)
-      
-      if (!hasAccepted) {
+        const hasAccepted = await hasAcknowledgedRequiredDisclaimers(userIdentifier)
+        setDisclaimersAccepted(hasAccepted)
+        
+        if (!hasAccepted) {
+          setShowDisclaimerModal(true)
+        }
+
+        // Initialize source registry on first load
+        await initializeSourceRegistry()
+
+        await createAuditLog({
+          userId: userIdentifier,
+          userRole: 'reader',
+          action: 'view',
+          entityType: 'application',
+          entityId: 'app-start',
+          metadata: { timestamp: new Date().toISOString() },
+        })
+      } catch (err) {
+        console.error('App initialization error:', err)
+        // Even if init fails, let user proceed through disclaimers
+        setUserId(`anonymous-${Date.now()}`)
+        setInitFailed(true)
         setShowDisclaimerModal(true)
       }
-
-      // Initialize source registry on first load
-      await initializeSourceRegistry()
-
-      await createAuditLog({
-        userId: userIdentifier,
-        userRole: 'reader',
-        action: 'view',
-        entityType: 'application',
-        entityId: 'app-start',
-        metadata: { timestamp: new Date().toISOString() },
-      })
     }
 
     initializeApp()
@@ -129,6 +153,37 @@ function App() {
     }
   }, [currentRoute, disclaimersAccepted])
 
+  // ── Document title per route ───────────────────────────────────────────
+  useEffect(() => {
+    const titles: Partial<Record<RouteId, string>> = {
+      home: 'Civics Stack',
+      'supreme-law': 'Supreme Law – Civics Stack',
+      'my-jurisdiction': `${selectedJurisdiction?.name ?? 'Jurisdiction'} – Civics Stack`,
+      local: 'Local Authority – Civics Stack',
+      search: 'Search – Civics Stack',
+      treaties: 'Treaties – Civics Stack',
+      analyzer: 'Analyzer – Civics Stack',
+      learn: 'Learn – Civics Stack',
+      citations: 'Citations – Civics Stack',
+      'case-law': 'Case Law – Civics Stack',
+      'federal-register': 'Federal Register – Civics Stack',
+      'legal-resources': 'Legal Resources – Civics Stack',
+    }
+    document.title = titles[currentRoute] || 'Civics Stack'
+  }, [currentRoute, selectedJurisdiction])
+
+  // ── Global Cmd+K → Search ─────────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        navigate('search')
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [navigate])
+
   // ── Breadcrumbs – built from selected document context ─────────────────
   const breadcrumbs = useMemo(() => {
     const routeLabels: Partial<Record<RouteId, string>> = {
@@ -141,6 +196,9 @@ function App() {
       analyzer: 'Analyzer',
       learn: 'Learn',
       citations: 'Citation Library',
+      'case-law': 'Case Law Search',
+      'federal-register': 'Federal Register',
+      'legal-resources': 'Legal Resources',
     }
 
     if (currentRoute === 'home') return []
@@ -265,11 +323,36 @@ function App() {
           onAccept={handleDisclaimersAccepted}
           userId={userId}
         />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-muted-foreground">Loading application...</p>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="flex items-center justify-center w-14 h-14 bg-amber-100 dark:bg-amber-900 rounded-xl mx-auto">
+              <Warning className="w-7 h-7 text-amber-600 dark:text-amber-400" weight="fill" />
+            </div>
+            <h1 className="text-xl font-serif font-semibold">Civics Stack</h1>
+            {!showDisclaimerModal ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {initFailed
+                    ? 'There was a problem loading. You can still continue.'
+                    : 'Loading application…'}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDisclaimerModal(true)}
+                  className="mt-2"
+                >
+                  Review Legal Disclaimers
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Please review and accept the legal disclaimers to continue.
+              </p>
+            )}
           </div>
         </div>
+        <Toaster position="top-center" />
       </>
     )
   }
@@ -282,6 +365,8 @@ function App() {
         jurisdictions={jurisdictions}
         onJurisdictionChange={handleJurisdictionChange}
         onSettingsClick={() => setShowSettings(true)}
+        activeRoute={currentRoute}
+        onNavigate={(route) => navigate(route)}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -311,6 +396,7 @@ function App() {
           )}
 
           <div className="px-4 py-6 md:px-8 pb-24 md:pb-8 max-w-7xl mx-auto">
+            <Suspense fallback={<ViewLoader />}>
             {currentRoute === 'home' && (
               <HomeView
                 selectedJurisdiction={selectedJurisdiction}
@@ -320,6 +406,9 @@ function App() {
                 onNavigateToAnalyzer={() => navigate('analyzer')}
                 onNavigateToBookmark={handleNavigateToBookmark}
                 onNavigateToCitations={() => navigate('citations')}
+                onNavigateToCaseLaw={() => navigate('case-law')}
+                onNavigateToFederalRegister={() => navigate('federal-register')}
+                onNavigateToResources={() => navigate('legal-resources')}
               />
             )}
 
@@ -388,6 +477,20 @@ function App() {
               />
             )}
 
+            {currentRoute === 'case-law' && (
+              <CaseLawSearchView />
+            )}
+
+            {currentRoute === 'federal-register' && (
+              <FederalRegisterView />
+            )}
+
+            {currentRoute === 'legal-resources' && (
+              <LegalResourcesView
+                onNavigate={(route) => navigate(route)}
+              />
+            )}
+
             {/* Fallback for section deep link when detail is closed */}
             {currentRoute === 'section' && !showSectionDetail && (
               <div className="text-center py-12">
@@ -406,7 +509,7 @@ function App() {
             {/* Fallback for unrecognized routes */}
             {!['home', 'supreme-law', 'my-jurisdiction', 'local', 'search',
               'treaties', 'analyzer', 'learn', 'citations', 'section',
-              'document', 'compare'].includes(currentRoute) && (
+              'document', 'compare', 'case-law', 'federal-register', 'legal-resources'].includes(currentRoute) && (
               <div className="text-center py-12">
                 <p className="text-lg font-semibold">Page Not Found</p>
                 <p className="text-muted-foreground mt-1">
@@ -419,6 +522,7 @@ function App() {
                 </p>
               </div>
             )}
+            </Suspense>
           </div>
         </main>
       </div>

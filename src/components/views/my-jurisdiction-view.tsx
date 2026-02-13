@@ -15,7 +15,8 @@ import {
   ArrowRight,
   Info,
   Scales,
-  BookOpen
+  BookOpen,
+  Warning,
 } from '@phosphor-icons/react'
 
 interface MyJurisdictionViewProps {
@@ -294,6 +295,16 @@ export function MyJurisdictionView({
               </CardContent>
             </Card>
           </div>
+
+          <Alert className="border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
+            <Warning className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
+            <AlertDescription className="text-xs text-amber-900 dark:text-amber-200">
+              <strong>Important Data Accuracy Notice.</strong> Preambles and Art. I, § 1 (Bill of Rights) contain actual state-specific text sourced from each state's official constitution. Other sections (Religion, Speech, Due Process, Legislative, Executive, Local Government) display <em>representative constitutional language</em> typical of state constitutions, not the actual text of {jurisdiction.name}'s constitution. Always verify provisions against the official source before citing.
+              {constitutionDoc?.sourceUrl && (
+                <span> Official source: <a href={constitutionDoc.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline font-medium">{constitutionDoc.sourceUrl}</a></span>
+              )}
+            </AlertDescription>
+          </Alert>
 
           <Alert>
             <Info />

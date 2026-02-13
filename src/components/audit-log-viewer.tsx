@@ -119,7 +119,7 @@ export function AuditLogViewer({ isAdmin = false }: AuditLogViewerProps) {
       case 'verify':
         return 'bg-purple-100 text-purple-800 border-purple-300'
       case 'flag':
-        return 'bg-amber-100 text-amber-800 border-amber-300'
+        return 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300'
     }

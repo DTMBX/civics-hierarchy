@@ -2,13 +2,11 @@ import { HIERARCHY_LADDER_RUNGS, buildHierarchyTree } from '@/lib/hierarchy'
 import { Document, Section, AuthorityLevel } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import {
   Scales,
   FileText,
   Globe,
   Bank,
-  Buildings,
   MapPin,
   CaretRight,
   Shield,
@@ -52,7 +50,7 @@ export function HierarchyLadder({
 
   return (
     <aside
-      className="hidden lg:flex flex-col w-72 border-r bg-card"
+      className="hidden md:flex flex-col w-72 border-r bg-card"
       role="navigation"
       aria-label="Authority Hierarchy"
     >

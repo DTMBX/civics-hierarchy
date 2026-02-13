@@ -51,8 +51,8 @@ export function SourceVerificationDisplay({
         return {
           icon: Warning,
           label: 'Unverified',
-          color: 'bg-amber-100 text-amber-800 border-amber-200',
-          iconColor: 'text-amber-600',
+          color: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700',
+          iconColor: 'text-amber-600 dark:text-amber-400',
           description:
             'User-submitted content. Not independently verified. Do not rely on for legal purposes.',
         }
@@ -138,9 +138,9 @@ export function SourceVerificationDisplay({
         {verificationStatus === 'unverified' && (
           <>
             <Separator />
-            <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-amber-900 mb-2">⚠️ Court Use Warning</p>
-              <p className="text-sm text-amber-800 leading-relaxed">
+            <div className="bg-amber-50 dark:bg-amber-950 border-2 border-amber-200 dark:border-amber-700 rounded-lg p-4">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">⚠️ Court Use Warning</p>
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
                 This content has not been independently verified. Do NOT cite this in court filings
                 or legal proceedings. Always verify through official government sources.
               </p>
@@ -207,8 +207,8 @@ export function VerificationBadge({ status, showLabel = true, size = 'md' }: Ver
         return {
           icon: Warning,
           label: 'Unverified',
-          className: 'bg-amber-100 text-amber-800 border-amber-300',
-          iconColor: 'text-amber-700',
+          className: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800',
+          iconColor: 'text-amber-700 dark:text-amber-400',
         }
     }
   }

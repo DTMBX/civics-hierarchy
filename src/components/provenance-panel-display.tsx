@@ -170,12 +170,12 @@ export function ProvenancePanelDisplay({ provenance, onExportReport }: Provenanc
         </div>
 
         {!sourceRegistryEntry.isOfficialSource && sourceRegistryEntry.curatorJustification && (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-700 rounded-lg">
             <div className="flex gap-2">
-              <Warning className="flex-shrink-0 text-amber-600" weight="fill" />
+              <Warning className="flex-shrink-0 text-amber-600 dark:text-amber-400" weight="fill" />
               <div className="text-sm">
-                <div className="font-medium text-amber-900">Non-official Source Notice</div>
-                <div className="text-amber-700 mt-1">
+                <div className="font-medium text-amber-900 dark:text-amber-200">Non-official Source Notice</div>
+                <div className="text-amber-700 dark:text-amber-400 mt-1">
                   {sourceRegistryEntry.curatorJustification}
                 </div>
               </div>
