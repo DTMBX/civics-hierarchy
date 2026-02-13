@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { SavedCitation, CitationCollection, Section, Document, Jurisdiction } from '@/lib/types'
 import { TagManager } from '@/components/tag-manager'
+import { SmartTagSuggestions } from '@/components/smart-tag-suggestions'
 import {
   Dialog,
   DialogContent,
@@ -112,7 +113,7 @@ export function AddToCitationLibraryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookmarkSimple className="w-5 h-5" />
@@ -125,131 +126,161 @@ export function AddToCitationLibraryDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Citation</Label>
-            <div className="bg-muted p-3 rounded-lg border border-border">
-              <div className="font-semibold text-sm mb-1">{section.title}</div>
-              <div className="font-mono text-xs text-muted-foreground">
-                {section.canonicalCitation}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Badge variant="secondary">{document.type}</Badge>
-              <span>•</span>
-              <span>{jurisdiction.name}</span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes (Optional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Add notes about why this citation is useful, how it relates to your work, etc."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="tags">Tags (Optional)</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowTagManager(true)}
-              >
-                <Tag className="w-4 h-4 mr-1" />
-                Browse Tags
-              </Button>
-            </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="default"
-                    className="pl-2 pr-1 gap-1"
-                    style={{ 
-                      backgroundColor: getTagColor(tag),
-                      color: 'white'
-                    }}
-                  >
-                    {tag}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 hover:bg-white/20"
-                      onClick={() => handleRemoveTag(tag)}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-            <Input
-              id="tags"
-              placeholder="Type tags separated by commas or click 'Browse Tags'"
-              value={tags.join(', ')}
-              onChange={(e) => setTags(
-                e.target.value
-                  .split(',')
-                  .map((t) => t.trim())
-                  .filter((t) => t)
-              )}
-            />
-            <p className="text-xs text-muted-foreground">
-              Organize by topic (e.g., Commerce Clause), case type, or practice area
-            </p>
-          </div>
-
-          {(collections || []).length > 0 && (
+        <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
+          <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Add to Collections</Label>
-              <ScrollArea className="h-32 rounded-lg border border-border p-3">
-                <div className="space-y-2">
-                  {(collections || []).map((collection) => (
-                    <div key={collection.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`collection-${collection.id}`}
-                        checked={selectedCollections.includes(collection.id)}
-                        onCheckedChange={() => handleToggleCollection(collection.id)}
-                      />
-                      <label
-                        htmlFor={`collection-${collection.id}`}
-                        className="flex items-center gap-2 flex-1 cursor-pointer"
+              <Label>Citation</Label>
+              <div className="bg-muted p-3 rounded-lg border border-border">
+                <div className="font-semibold text-sm mb-1">{section.title}</div>
+                <div className="font-mono text-xs text-muted-foreground">
+                  {section.canonicalCitation}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant="secondary">{document.type}</Badge>
+                <span>•</span>
+                <span>{jurisdiction.name}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                placeholder="Add notes about why this citation is useful, how it relates to your work, etc."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <SmartTagSuggestions
+              citation={{
+                id: existingCitation?.id || '',
+                sectionId: section.id,
+                documentId: document.id,
+                jurisdictionId: jurisdiction.id,
+                title: section.title,
+                canonicalCitation: section.canonicalCitation,
+                tags: tags,
+                notes: notes,
+                collections: selectedCollections,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                accessCount: 0,
+                isFavorite: isFavorite,
+              }}
+              section={section}
+              document={document}
+              allTags={tagDefinitions || []}
+              currentTags={tags}
+              onApplySuggestion={(tagName) => {
+                if (!tags.includes(tagName)) {
+                  setTags(current => [...current, tagName])
+                }
+              }}
+              onDismissSuggestion={() => {}}
+            />
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="tags">Tags (Optional)</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTagManager(true)}
+                >
+                  <Tag className="w-4 h-4 mr-1" />
+                  Browse Tags
+                </Button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
+                  {tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="default"
+                      className="pl-2 pr-1 gap-1"
+                      style={{ 
+                        backgroundColor: getTagColor(tag),
+                        color: 'white'
+                      }}
+                    >
+                      {tag}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 hover:bg-white/20"
+                        onClick={() => handleRemoveTag(tag)}
                       >
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: collection.color }}
-                        />
-                        <span className="text-sm">{collection.name}</span>
-                        {collection.description && (
-                          <span className="text-xs text-muted-foreground">
-                            — {collection.description}
-                          </span>
-                        )}
-                      </label>
-                    </div>
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </Badge>
                   ))}
                 </div>
-              </ScrollArea>
+              )}
+              <Input
+                id="tags"
+                placeholder="Type tags separated by commas or click 'Browse Tags'"
+                value={tags.join(', ')}
+                onChange={(e) => setTags(
+                  e.target.value
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter((t) => t)
+                )}
+              />
+              <p className="text-xs text-muted-foreground">
+                Organize by topic (e.g., Commerce Clause), case type, or practice area
+              </p>
             </div>
-          )}
 
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="favorite"
-              checked={isFavorite}
-              onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-            />
-            <label htmlFor="favorite" className="text-sm cursor-pointer">
-              Mark as favorite for quick access
-            </label>
+            {(collections || []).length > 0 && (
+              <div className="space-y-2">
+                <Label>Add to Collections</Label>
+                <ScrollArea className="h-32 rounded-lg border border-border p-3">
+                  <div className="space-y-2">
+                    {(collections || []).map((collection) => (
+                      <div key={collection.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`collection-${collection.id}`}
+                          checked={selectedCollections.includes(collection.id)}
+                          onCheckedChange={() => handleToggleCollection(collection.id)}
+                        />
+                        <label
+                          htmlFor={`collection-${collection.id}`}
+                          className="flex items-center gap-2 flex-1 cursor-pointer"
+                        >
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: collection.color }}
+                          />
+                          <span className="text-sm">{collection.name}</span>
+                          {collection.description && (
+                            <span className="text-xs text-muted-foreground">
+                              — {collection.description}
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="favorite"
+                checked={isFavorite}
+                onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+              />
+              <label htmlFor="favorite" className="text-sm cursor-pointer">
+                Mark as favorite for quick access
+              </label>
+            </div>
           </div>
-        </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>

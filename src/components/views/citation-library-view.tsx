@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { BatchCitationExportDialog } from '@/components/batch-citation-export-dialog'
 import { TagManager, TagDefinition } from '@/components/tag-manager'
 import { CitationTagStats } from '@/components/citation-tag-stats'
+import { SmartTagSuggestions } from '@/components/smart-tag-suggestions'
 import { jurisdictions } from '@/lib/seed-data'
 import {
   DropdownMenu,
@@ -677,88 +678,105 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
       </Dialog>
 
       <Dialog open={showEditCitation} onOpenChange={setShowEditCitation}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Edit Citation</DialogTitle>
             <DialogDescription>Update notes and tags for this citation</DialogDescription>
           </DialogHeader>
           {editingCitation && (
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Citation</Label>
-                <div className="text-sm font-mono bg-muted p-2 rounded border border-border">
-                  {editingCitation.canonicalCitation}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-notes">Notes</Label>
-                <Textarea
-                  id="edit-notes"
-                  placeholder="Add notes about why this citation is important..."
-                  value={editingCitation.notes}
-                  onChange={(e) =>
-                    setEditingCitation({ ...editingCitation, notes: e.target.value })
-                  }
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="edit-tags">Tags</Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowTagManager(true)}
-                  >
-                    <Tag className="w-4 h-4 mr-1" />
-                    Manage Tags
-                  </Button>
-                </div>
-                {editingCitationTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
-                    {editingCitationTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="default"
-                        className="pl-2 pr-1 gap-1"
-                        style={{ 
-                          backgroundColor: getTagColor(tag),
-                          color: 'white'
-                        }}
-                      >
-                        {tag}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 hover:bg-white/20"
-                          onClick={() =>
-                            setEditingCitationTags(tags => tags.filter(t => t !== tag))
-                          }
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </Badge>
-                    ))}
+            <ScrollArea className="max-h-[calc(90vh-200px)] pr-4">
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Citation</Label>
+                  <div className="text-sm font-mono bg-muted p-2 rounded border border-border">
+                    {editingCitation.canonicalCitation}
                   </div>
-                )}
-                <Input
-                  id="edit-tags"
-                  placeholder="Type tag names separated by commas"
-                  value={editingCitationTags.join(', ')}
-                  onChange={(e) =>
-                    setEditingCitationTags(
-                      e.target.value
-                        .split(',')
-                        .map((t) => t.trim())
-                        .filter((t) => t)
-                    )
-                  }
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-notes">Notes</Label>
+                  <Textarea
+                    id="edit-notes"
+                    placeholder="Add notes about why this citation is important..."
+                    value={editingCitation.notes}
+                    onChange={(e) =>
+                      setEditingCitation({ ...editingCitation, notes: e.target.value })
+                    }
+                    rows={4}
+                  />
+                </div>
+
+                <SmartTagSuggestions
+                  citation={editingCitation}
+                  section={sections.find(s => s.id === editingCitation.sectionId)}
+                  document={documents.find(d => d.id === editingCitation.documentId)}
+                  allTags={tagDefinitions || []}
+                  currentTags={editingCitationTags}
+                  onApplySuggestion={(tagName) => {
+                    if (!editingCitationTags.includes(tagName)) {
+                      setEditingCitationTags(tags => [...tags, tagName])
+                    }
+                  }}
+                  onDismissSuggestion={() => {}}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Or click "Manage Tags" to select from predefined tags
-                </p>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-tags">Tags</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowTagManager(true)}
+                    >
+                      <Tag className="w-4 h-4 mr-1" />
+                      Manage Tags
+                    </Button>
+                  </div>
+                  {editingCitationTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
+                      {editingCitationTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="default"
+                          className="pl-2 pr-1 gap-1"
+                          style={{ 
+                            backgroundColor: getTagColor(tag),
+                            color: 'white'
+                          }}
+                        >
+                          {tag}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 hover:bg-white/20"
+                            onClick={() =>
+                              setEditingCitationTags(tags => tags.filter(t => t !== tag))
+                            }
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <Input
+                    id="edit-tags"
+                    placeholder="Type tag names separated by commas"
+                    value={editingCitationTags.join(', ')}
+                    onChange={(e) =>
+                      setEditingCitationTags(
+                        e.target.value
+                          .split(',')
+                          .map((t) => t.trim())
+                          .filter((t) => t)
+                      )
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Or click "Manage Tags" to select from predefined tags
+                  </p>
+                </div>
               </div>
-            </div>
+            </ScrollArea>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditCitation(false)}>
