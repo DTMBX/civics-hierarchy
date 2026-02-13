@@ -55,11 +55,11 @@ This is a sophisticated educational platform requiring multi-jurisdictional docu
 - **Success criteria**: Every local law item displays verification status badge; unverified items require explicit warning; audit log tracks all additions
 
 ### Citation & Export Tools
-- **Functionality**: Generate court-defensible citations in multiple formats (Bluebook, ALWD, APA, MLA, Chicago, BibTeX, Plain Text, Court Filing) with complete verification metadata, audit trails, and export to multiple file formats (TXT, MD, HTML, JSON, CSV, BibTeX)
-- **Purpose**: Enable reliable, court-defensible sourcing for journalists, educators, advocates, researchers, and legal professionals with full traceability and verification standards
-- **Trigger**: From any document section → "Export Citation" button or quick export dropdown
-- **Progression**: Select citation style (Bluebook/ALWD/APA/MLA/Chicago/Court Filing/BibTeX/Plain/JSON) → choose export format (TXT/MD/HTML/JSON/CSV/BibTeX) → configure options (include full text, metadata, verification chain, audit trail, disclaimers) → preview citation → export to file or copy to clipboard → system generates immutable audit log entry → recipient receives properly formatted citation with verification metadata
-- **Success criteria**: Citations match canonical legal citation formats; all exports include verification status, source URLs, last-verified dates, and audit trail IDs; disclaimers clearly state educational purpose and requirement to cite official sources for court filings; batch export supports multiple citations in single file; quick export enables clipboard copy in common formats; all exports are traceable through audit logs
+- **Functionality**: Generate court-defensible citations in multiple formats (Bluebook, ALWD, APA, MLA, Chicago, BibTeX, Plain Text, Court Filing) with complete verification metadata, audit trails, and export to multiple file formats (TXT, MD, HTML, JSON, CSV, BibTeX); organize saved citations with tags and collections
+- **Purpose**: Enable reliable, court-defensible sourcing for journalists, educators, advocates, researchers, and legal professionals with full traceability and verification standards; provide powerful organization tools for citation management
+- **Trigger**: From any document section → "Export Citation" button or quick export dropdown; from Citation Library → tag management and filtering
+- **Progression**: Select citation style (Bluebook/ALWD/APA/MLA/Chicago/Court Filing/BibTeX/Plain/JSON) → choose export format (TXT/MD/HTML/JSON/CSV/BibTeX) → configure options (include full text, metadata, verification chain, audit trail, disclaimers) → add tags (from predefined categories: constitutional provisions, legal topics, case types, authority levels, jurisdictions, practice areas, or custom) → assign to collections → preview citation → export to file or copy to clipboard → system generates immutable audit log entry → recipient receives properly formatted citation with verification metadata
+- **Success criteria**: Citations match canonical legal citation formats; all exports include verification status, source URLs, last-verified dates, and audit trail IDs; disclaimers clearly state educational purpose and requirement to cite official sources for court filings; batch export supports multiple citations in single file; quick export enables clipboard copy in common formats; all exports are traceable through audit logs; tags enable efficient filtering and organization by topic, case type, or project; tag statistics show usage patterns
 
 ### Batch Citation Export
 - **Functionality**: Export multiple citations simultaneously in a combined file with consistent formatting and complete verification metadata for all items
@@ -108,6 +108,9 @@ This is a sophisticated educational platform requiring multi-jurisdictional docu
 - **Court Defensibility Challenges**: Comprehensive audit trail, source verification documentation, and disclaimer acknowledgments provide evidence of responsible operation
 - **Unauthorized Practice of Law Claims**: Multi-layered disclaimers, educational framing, and explicit no-attorney-client-relationship statements protect against such claims
 - **Data Breach or Security Incident**: Immediate containment, user notification within 72 hours, full incident documentation in audit log, and remediation with enhanced controls
+- **Tag Management**: Users can create custom tags or select from predefined categories; duplicate tag names prevented; unused tags can be deleted; tag renaming updates all citations
+- **Tag Filtering**: Support multiple tag filters with AND logic (citations must have all selected tags); clear visual indication of active filters; one-click filter clearing
+- **Collection vs Tag Confusion**: Collections are user-defined groupings (like folders), tags are flexible labels (like sticky notes); citations can belong to multiple collections and have multiple tags
 
 ## Design Direction
 

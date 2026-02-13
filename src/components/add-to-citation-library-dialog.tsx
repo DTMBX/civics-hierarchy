@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { SavedCitation, CitationCollection, Section, Document, Jurisdiction } from '@/lib/types'
+import { TagManager } from '@/components/tag-manager'
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { BookmarkSimple, Plus } from '@phosphor-icons/react'
+import { BookmarkSimple, Plus, Tag, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface AddToCitationLibraryDialogProps {
@@ -36,12 +37,21 @@ export function AddToCitationLibraryDialog({
 }: AddToCitationLibraryDialogProps) {
   const [savedCitations, setSavedCitations] = useKV<SavedCitation[]>('citation-library', [])
   const [collections, setCollections] = useKV<CitationCollection[]>('citation-collections', [])
+  const [tagDefinitions] = useKV<any[]>('tag-definitions', [])
   const [notes, setNotes] = useState('')
-  const [tags, setTags] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [selectedCollections, setSelectedCollections] = useState<string[]>([])
   const [isFavorite, setIsFavorite] = useState(false)
+  const [showTagManager, setShowTagManager] = useState(false)
 
   const existingCitation = (savedCitations || []).find((c) => c.sectionId === section.id)
+
+  const getTagColor = (tagName: string): string => {
+    const tagDef = Array.isArray(tagDefinitions) 
+      ? tagDefinitions.find((t: any) => t.name === tagName)
+      : undefined
+    return tagDef?.color || '#64748B'
+  }
 
   const handleSave = () => {
     if (existingCitation) {
@@ -51,12 +61,7 @@ export function AddToCitationLibraryDialog({
             ? {
                 ...c,
                 notes: notes || c.notes,
-                tags: tags
-                  ? tags
-                      .split(',')
-                      .map((t) => t.trim())
-                      .filter((t) => t)
-                  : c.tags,
+                tags: tags.length > 0 ? tags : c.tags,
                 collections: selectedCollections,
                 isFavorite: isFavorite || c.isFavorite,
                 updatedAt: new Date().toISOString(),
@@ -73,10 +78,7 @@ export function AddToCitationLibraryDialog({
         jurisdictionId: jurisdiction.id,
         title: section.title,
         canonicalCitation: section.canonicalCitation,
-        tags: tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter((t) => t),
+        tags: tags,
         notes: notes,
         collections: selectedCollections,
         createdAt: new Date().toISOString(),
@@ -90,10 +92,14 @@ export function AddToCitationLibraryDialog({
     }
 
     setNotes('')
-    setTags('')
+    setTags([])
     setSelectedCollections([])
     setIsFavorite(false)
     onClose()
+  }
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(current => current.filter(t => t !== tagToRemove))
   }
 
   const handleToggleCollection = (collectionId: string) => {
@@ -147,15 +153,55 @@ export function AddToCitationLibraryDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags (Optional)</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tags">Tags (Optional)</Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTagManager(true)}
+              >
+                <Tag className="w-4 h-4 mr-1" />
+                Browse Tags
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="default"
+                    className="pl-2 pr-1 gap-1"
+                    style={{ 
+                      backgroundColor: getTagColor(tag),
+                      color: 'white'
+                    }}
+                  >
+                    {tag}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 hover:bg-white/20"
+                      onClick={() => handleRemoveTag(tag)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            )}
             <Input
               id="tags"
-              placeholder="Separate tags with commas (e.g., commerce clause, precedent, federalism)"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
+              placeholder="Type tags separated by commas or click 'Browse Tags'"
+              value={tags.join(', ')}
+              onChange={(e) => setTags(
+                e.target.value
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter((t) => t)
+              )}
             />
             <p className="text-xs text-muted-foreground">
-              Use tags to categorize and search your citations
+              Organize by topic (e.g., Commerce Clause), case type, or practice area
             </p>
           </div>
 
@@ -214,6 +260,14 @@ export function AddToCitationLibraryDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <TagManager
+        open={showTagManager}
+        onClose={() => setShowTagManager(false)}
+        selectedTags={tags}
+        onTagsChange={setTags}
+        showManagement={false}
+      />
     </Dialog>
   )
 }

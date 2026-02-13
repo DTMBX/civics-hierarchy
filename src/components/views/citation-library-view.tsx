@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { BatchCitationExportDialog } from '@/components/batch-citation-export-dialog'
+import { TagManager, TagDefinition } from '@/components/tag-manager'
+import { CitationTagStats } from '@/components/citation-tag-stats'
 import { jurisdictions } from '@/lib/seed-data'
 import {
   DropdownMenu,
@@ -42,6 +44,8 @@ import {
   Folder,
   PencilSimple,
   SortAscending,
+  Funnel,
+  X,
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
@@ -56,12 +60,16 @@ type SortOption = 'recent' | 'alphabetical' | 'most-used' | 'favorite'
 export function CitationLibraryView({ documents, sections, onSectionSelect }: CitationLibraryViewProps) {
   const [savedCitations, setSavedCitations] = useKV<SavedCitation[]>('citation-library', [])
   const [collections, setCollections] = useKV<CitationCollection[]>('citation-collections', [])
+  const [tagDefinitions, setTagDefinitions] = useKV<TagDefinition[]>('tag-definitions', [])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCollection, setSelectedCollection] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortOption>('recent')
+  const [filterTags, setFilterTags] = useState<string[]>([])
   const [showNewCollection, setShowNewCollection] = useState(false)
   const [showEditCitation, setShowEditCitation] = useState(false)
+  const [showTagManager, setShowTagManager] = useState(false)
   const [editingCitation, setEditingCitation] = useState<SavedCitation | null>(null)
+  const [editingCitationTags, setEditingCitationTags] = useState<string[]>([])
   const [newCollectionName, setNewCollectionName] = useState('')
   const [newCollectionDescription, setNewCollectionDescription] = useState('')
   const [newCollectionColor, setNewCollectionColor] = useState('#4F46E5')
@@ -102,6 +110,12 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
       )
     }
 
+    if (filterTags.length > 0) {
+      filtered = filtered.filter((c) =>
+        filterTags.every((tag) => c.tags.includes(tag))
+      )
+    }
+
     if (selectedCollection === 'favorites') {
       filtered = filtered.filter((c) => c.isFavorite)
     } else if (selectedCollection !== 'all') {
@@ -124,7 +138,7 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
     }
 
     return filtered
-  }, [savedCitations, searchQuery, selectedCollection, sortBy])
+  }, [savedCitations, searchQuery, selectedCollection, sortBy, filterTags])
 
   const handleCreateCollection = () => {
     if (!newCollectionName.trim()) {
@@ -202,6 +216,7 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
 
   const handleEditCitation = (citation: SavedCitation) => {
     setEditingCitation(citation)
+    setEditingCitationTags(citation.tags)
     setShowEditCitation(true)
   }
 
@@ -211,13 +226,23 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
     setSavedCitations((current) =>
       (current || []).map((c) =>
         c.id === editingCitation.id
-          ? { ...editingCitation, updatedAt: new Date().toISOString() }
+          ? { ...editingCitation, tags: editingCitationTags, updatedAt: new Date().toISOString() }
           : c
       )
     )
     setShowEditCitation(false)
     setEditingCitation(null)
+    setEditingCitationTags([])
     toast.success('Citation updated')
+  }
+
+  const handleRemoveFilterTag = (tagToRemove: string) => {
+    setFilterTags(current => current.filter(t => t !== tagToRemove))
+  }
+
+  const getTagColor = (tagName: string): string => {
+    const tagDef = (tagDefinitions || []).find(t => t.name === tagName)
+    return tagDef?.color || '#64748B'
   }
 
   const handleCopyCitation = async (citation: SavedCitation) => {
@@ -294,41 +319,106 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search citations, tags, notes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+      {(savedCitations || []).length > 0 && (
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-2 space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="relative flex-1 max-w-md">
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search citations, tags, notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTagManager(true)}
+                >
+                  <Tag className="w-4 h-4 mr-2" />
+                  Filter by Tags
+                  {filterTags.length > 0 && (
+                    <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                      {filterTags.length}
+                    </Badge>
+                  )}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <SortAscending className="w-4 h-4 mr-2" />
+                      Sort
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                      Most Recent
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
+                      Alphabetical
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('most-used')}>
+                      Most Used
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy('favorite')}>
+                      Favorites First
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {filterTags.length > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
+                <Funnel className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-sm text-muted-foreground shrink-0">Filtering by:</span>
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {filterTags.map(tagName => (
+                    <Badge
+                      key={tagName}
+                      variant="default"
+                      className="pl-2 pr-1 gap-1"
+                      style={{ 
+                        backgroundColor: getTagColor(tagName),
+                        color: 'white'
+                      }}
+                    >
+                      {tagName}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 hover:bg-white/20"
+                        onClick={() => handleRemoveFilterTag(tagName)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFilterTags([])}
+                  className="shrink-0"
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <CitationTagStats
+              citations={savedCitations || []}
+              onTagClick={(tag) => setFilterTags([tag])}
+              tagDefinitions={tagDefinitions || []}
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <SortAscending className="w-4 h-4 mr-2" />
-                Sort
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortBy('recent')}>
-                Most Recent
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
-                Alphabetical
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('most-used')}>
-                Most Used
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('favorite')}>
-                Favorites First
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      )}
 
       <Tabs value={selectedCollection} onValueChange={setSelectedCollection}>
         <TabsList className="w-full justify-start overflow-x-auto">
@@ -461,7 +551,17 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
                       {citation.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {citation.tags.slice(0, 3).map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
+                            <Badge 
+                              key={tag} 
+                              variant="secondary" 
+                              className="text-xs"
+                              style={{
+                                backgroundColor: `${getTagColor(tag)}20`,
+                                borderColor: getTagColor(tag),
+                                color: getTagColor(tag),
+                                borderWidth: '1px'
+                              }}
+                            >
                               {tag}
                             </Badge>
                           ))}
@@ -603,21 +703,60 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-tags">Tags (comma separated)</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="edit-tags">Tags</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTagManager(true)}
+                  >
+                    <Tag className="w-4 h-4 mr-1" />
+                    Manage Tags
+                  </Button>
+                </div>
+                {editingCitationTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded border">
+                    {editingCitationTags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="default"
+                        className="pl-2 pr-1 gap-1"
+                        style={{ 
+                          backgroundColor: getTagColor(tag),
+                          color: 'white'
+                        }}
+                      >
+                        {tag}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 hover:bg-white/20"
+                          onClick={() =>
+                            setEditingCitationTags(tags => tags.filter(t => t !== tag))
+                          }
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 <Input
                   id="edit-tags"
-                  placeholder="e.g., commerce clause, federalism, precedent"
-                  value={editingCitation.tags.join(', ')}
+                  placeholder="Type tag names separated by commas"
+                  value={editingCitationTags.join(', ')}
                   onChange={(e) =>
-                    setEditingCitation({
-                      ...editingCitation,
-                      tags: e.target.value
+                    setEditingCitationTags(
+                      e.target.value
                         .split(',')
                         .map((t) => t.trim())
-                        .filter((t) => t),
-                    })
+                        .filter((t) => t)
+                    )
                   }
                 />
+                <p className="text-xs text-muted-foreground">
+                  Or click "Manage Tags" to select from predefined tags
+                </p>
               </div>
             </div>
           )}
@@ -638,6 +777,20 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
         sections={sections}
         jurisdictions={jurisdictions}
         userId={userId}
+      />
+
+      <TagManager
+        open={showTagManager}
+        onClose={() => setShowTagManager(false)}
+        selectedTags={editingCitation ? editingCitationTags : filterTags}
+        onTagsChange={(tags) => {
+          if (editingCitation) {
+            setEditingCitationTags(tags)
+          } else {
+            setFilterTags(tags)
+          }
+        }}
+        showManagement={true}
       />
     </div>
   )
