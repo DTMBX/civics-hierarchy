@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
   const [currentPage, setCurrentPage] = useState(0)
   const [checkedDisclaimers, setCheckedDisclaimers] = useState<Set<DisclaimerType>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
+  const [scrolledToBottom, setScrolledToBottom] = useState(false)
 
   const requiredDisclaimers: DisclaimerType[] = [
     'not-legal-advice',
@@ -41,20 +42,24 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
   const isLastPage = currentPage === requiredDisclaimers.length - 1
   const progressPercentage = ((currentPage + 1) / requiredDisclaimers.length) * 100
 
+  useEffect(() => {
+    setScrolledToBottom(false)
+  }, [currentPage])
+
   const handleCheckboxChange = (checked: boolean) => {
     const newSet = new Set(checkedDisclaimers)
     if (checked) {
       newSet.add(currentDisclaimerType)
+      
+      if (!isLastPage) {
+        setTimeout(() => {
+          setCurrentPage(currentPage + 1)
+        }, 400)
+      }
     } else {
       newSet.delete(currentDisclaimerType)
     }
     setCheckedDisclaimers(newSet)
-  }
-
-  const handleNext = () => {
-    if (isCurrentChecked && !isLastPage) {
-      setCurrentPage(currentPage + 1)
-    }
   }
 
   const handleBack = () => {
@@ -79,112 +84,136 @@ export function LegalDisclaimerModal({ open, onAccept, userId }: LegalDisclaimer
     }
   }
 
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement
+    const scrollThreshold = 20
+    const isAtBottom = target.scrollHeight - target.scrollTop - target.clientHeight < scrollThreshold
+    setScrolledToBottom(isAtBottom)
+  }
+
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-3xl max-h-[90vh]" onPointerDownOutside={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-full">
-              <Warning className="w-6 h-6 text-amber-600" weight="fill" />
+      <DialogContent 
+        className="max-w-4xl w-[95vw] h-[95vh] max-h-[900px] flex flex-col p-0" 
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-14 h-14 bg-amber-100 rounded-xl shrink-0">
+              <Warning className="w-7 h-7 text-amber-600" weight="fill" />
             </div>
-            <div className="flex-1">
-              <DialogTitle className="text-2xl">Important Legal Information</DialogTitle>
-              <DialogDescription className="text-base mt-1">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-2xl md:text-3xl font-serif">Important Legal Information</DialogTitle>
+              <DialogDescription className="text-base mt-1.5">
                 Disclosure {currentPage + 1} of {requiredDisclaimers.length}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-2">
+        <div className="px-6 py-4 border-b shrink-0 space-y-3">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Progress</span>
-            <span className="font-medium">{currentPage + 1}/{requiredDisclaimers.length}</span>
+            <span className="font-medium">Progress</span>
+            <span className="font-semibold text-foreground">{currentPage + 1} / {requiredDisclaimers.length}</span>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <Progress value={progressPercentage} className="h-2.5" />
         </div>
 
-        <Alert className="border-amber-200 bg-amber-50">
-          <Warning className="h-5 w-5 text-amber-600" />
-          <AlertDescription className="text-sm font-medium text-amber-900">
-            You must read and acknowledge this disclosure to continue. These statements are
-            essential for court-defensible compliance.
+        <Alert className="mx-6 mt-4 border-amber-300 bg-amber-50 shrink-0">
+          <Warning className="h-5 w-5 text-amber-600" weight="fill" />
+          <AlertDescription className="text-sm font-medium text-amber-900 leading-relaxed">
+            Please read the disclosure carefully and scroll to the bottom. Check the box to acknowledge and automatically proceed to the next disclosure.
           </AlertDescription>
         </Alert>
 
-        <ScrollArea className="h-[320px] pr-4">
-          <div
-            className={`border-2 rounded-lg p-6 transition-colors ${
-              isCurrentChecked ? 'border-primary bg-primary/5' : 'border-border bg-card'
-            }`}
-          >
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-xl font-serif flex items-center gap-2">
-                    {currentDisclaimer.title}
-                    {isCurrentChecked && (
-                      <SealCheck className="w-6 h-6 text-primary" weight="fill" />
-                    )}
-                  </h3>
-                  <p className="text-base text-foreground mt-4 leading-relaxed whitespace-pre-line">
-                    {currentDisclaimer.content}
-                  </p>
+        <div className="flex-1 overflow-hidden px-6 py-4">
+          <ScrollArea className="h-full pr-4" onScrollCapture={handleScroll}>
+            <div
+              className={`border-2 rounded-xl p-6 md:p-8 transition-all duration-300 ${
+                isCurrentChecked 
+                  ? 'border-primary bg-primary/5 shadow-lg' 
+                  : 'border-border bg-card'
+              }`}
+            >
+              <div className="space-y-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-2xl md:text-3xl font-serif flex items-center gap-3 flex-wrap">
+                      {currentDisclaimer.title}
+                      {isCurrentChecked && (
+                        <SealCheck className="w-7 h-7 text-primary shrink-0 animate-in zoom-in-50" weight="fill" />
+                      )}
+                    </h3>
+                    <div className="mt-6 prose prose-base max-w-none">
+                      <p className="text-base md:text-lg text-foreground leading-relaxed whitespace-pre-line">
+                        {currentDisclaimer.content}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-start gap-3 pt-4 border-t">
-                <Checkbox
-                  id={`disclaimer-${currentDisclaimerType}`}
-                  checked={isCurrentChecked}
-                  onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
-                  className="mt-1"
-                />
-                <Label
-                  htmlFor={`disclaimer-${currentDisclaimerType}`}
-                  className="text-sm font-medium cursor-pointer leading-relaxed"
-                >
-                  I have read and understand this disclosure and acknowledge its importance for legal compliance
-                </Label>
+                <div className="flex items-start gap-4 pt-6 border-t-2">
+                  <Checkbox
+                    id={`disclaimer-${currentDisclaimerType}`}
+                    checked={isCurrentChecked}
+                    onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
+                    className="mt-1.5 h-5 w-5"
+                    disabled={!scrolledToBottom && currentDisclaimer.content.length > 500}
+                  />
+                  <Label
+                    htmlFor={`disclaimer-${currentDisclaimerType}`}
+                    className="text-sm md:text-base font-medium cursor-pointer leading-relaxed flex-1"
+                  >
+                    I have read and understand this disclosure in full and acknowledge its importance for legal compliance and court-defensible documentation
+                  </Label>
+                </div>
+                
+                {!scrolledToBottom && currentDisclaimer.content.length > 500 && !isCurrentChecked && (
+                  <Alert className="border-blue-300 bg-blue-50">
+                    <AlertDescription className="text-sm text-blue-900">
+                      Please scroll to the bottom to enable the acknowledgment checkbox.
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-3 border-t pt-4">
-          <div className="flex gap-2 w-full sm:w-auto order-2 sm:order-1">
-            <Button
-              onClick={handleBack}
-              disabled={currentPage === 0}
-              variant="outline"
-              size="lg"
-              className="flex-1 sm:flex-initial"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </div>
-          <div className="flex-1 order-1 sm:order-2" />
-          <div className="flex gap-2 w-full sm:w-auto order-3">
-            {!isLastPage ? (
-              <Button
-                onClick={handleNext}
-                disabled={!isCurrentChecked}
-                size="lg"
-                className="flex-1 sm:flex-initial"
-              >
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
+        <DialogFooter className="px-6 py-4 border-t shrink-0 flex-row justify-between items-center gap-3">
+          <Button
+            onClick={handleBack}
+            disabled={currentPage === 0}
+            variant="outline"
+            size="lg"
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          
+          <div className="flex items-center gap-3">
+            {isLastPage && (
               <Button
                 onClick={handleAccept}
                 disabled={!isCurrentChecked || isProcessing}
                 size="lg"
-                className="flex-1 sm:flex-initial"
+                className="gap-2 min-w-[180px]"
               >
-                {isProcessing ? 'Processing...' : 'Accept & Continue'}
+                {isProcessing ? (
+                  'Processing...'
+                ) : (
+                  <>
+                    Accept & Continue
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
+            )}
+            {!isLastPage && isCurrentChecked && (
+              <div className="text-sm text-muted-foreground italic">
+                Advancing to next disclosure...
+              </div>
             )}
           </div>
         </DialogFooter>
