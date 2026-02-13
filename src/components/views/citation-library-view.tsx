@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { BatchCitationExportDialog } from '@/components/batch-citation-export-dialog'
+import { BatchDeepAnalysisDialog } from '@/components/batch-deep-analysis-dialog'
 import { TagManager, TagDefinition } from '@/components/tag-manager'
 import { CitationTagStats } from '@/components/citation-tag-stats'
 import { SmartTagSuggestions } from '@/components/smart-tag-suggestions'
@@ -47,6 +48,7 @@ import {
   SortAscending,
   Funnel,
   X,
+  Brain,
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
@@ -75,6 +77,7 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
   const [newCollectionDescription, setNewCollectionDescription] = useState('')
   const [newCollectionColor, setNewCollectionColor] = useState('#4F46E5')
   const [showBatchExport, setShowBatchExport] = useState(false)
+  const [showBatchAnalysis, setShowBatchAnalysis] = useState(false)
   const [userId, setUserId] = useState<string>('anonymous')
 
   useState(() => {
@@ -293,6 +296,16 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
     return (savedCitations || []).filter((c) => c.collections.includes(collectionId)).length
   }
 
+  const handleApplyBatchTags = (citationId: string, tags: string[]) => {
+    setSavedCitations((current) =>
+      (current || []).map((c) =>
+        c.id === citationId
+          ? { ...c, tags, updatedAt: new Date().toISOString() }
+          : c
+      )
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -308,10 +321,16 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
             Export
           </Button>
           {filteredCitations.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => setShowBatchExport(true)}>
-              <Download className="w-4 h-4 mr-2" />
-              Export All
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={() => setShowBatchAnalysis(true)}>
+                <Brain className="w-4 h-4 mr-2" />
+                Batch Analysis
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowBatchExport(true)}>
+                <Download className="w-4 h-4 mr-2" />
+                Export All
+              </Button>
+            </>
           )}
           <Button size="sm" onClick={() => setShowNewCollection(true)}>
             <Plus className="w-4 h-4 mr-2" />
@@ -795,6 +814,16 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
         sections={sections}
         jurisdictions={jurisdictions}
         userId={userId}
+      />
+
+      <BatchDeepAnalysisDialog
+        open={showBatchAnalysis}
+        onClose={() => setShowBatchAnalysis(false)}
+        citations={filteredCitations}
+        documents={documents}
+        sections={sections}
+        allTags={tagDefinitions || []}
+        onApplyTags={handleApplyBatchTags}
       />
 
       <TagManager
