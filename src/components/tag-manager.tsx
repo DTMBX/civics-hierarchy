@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -161,11 +161,11 @@ export function TagManager({ open, onClose, selectedTags, onTagsChange, showMana
     }
   }
 
-  useState(() => {
+  useEffect(() => {
     if ((tagDefinitions || []).length === 0) {
       initializePredefinedTags()
     }
-  })
+  }, [])
 
   const allTags = useMemo(() => {
     return tagDefinitions || []

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { SavedCitation, CitationCollection, Section, Document } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -80,14 +80,14 @@ export function CitationLibraryView({ documents, sections, onSectionSelect }: Ci
   const [showBatchAnalysis, setShowBatchAnalysis] = useState(false)
   const [userId, setUserId] = useState<string>('anonymous')
 
-  useState(() => {
+  useEffect(() => {
     const getUser = async () => {
       const user = await window.spark.user()
       const userIdentifier = user?.login || String(user?.id || '') || `anonymous-${Date.now()}`
       setUserId(userIdentifier)
     }
     getUser()
-  })
+  }, [])
 
   const collectionColors = [
     '#4F46E5',
