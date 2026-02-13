@@ -7,10 +7,47 @@ export type DocumentType =
   | 'treaty' 
   | 'ordinance'
   | 'organic-act'
+  | 'amendment'
+  | 'code'
 
 export type VerificationStatus = 'unverified' | 'verified' | 'official'
 
 export type UserRole = 'reader' | 'contributor' | 'curator' | 'admin'
+
+export type CitationStyle = 
+  | 'bluebook'
+  | 'alwd'
+  | 'apa'
+  | 'mla'
+  | 'chicago'
+  | 'plain'
+  | 'court-filing'
+  | 'bibtex'
+  | 'json'
+
+export type AuditAction = 
+  | 'view'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'approve'
+  | 'reject'
+  | 'verify'
+  | 'export'
+  | 'submit'
+  | 'flag'
+  | 'acknowledge'
+
+export type EntityType =
+  | 'application'
+  | 'document'
+  | 'section'
+  | 'bookmark'
+  | 'citation'
+  | 'note'
+  | 'submission'
+  | 'disclaimer'
+  | 'collection'
 
 export interface Jurisdiction {
   id: string
@@ -18,6 +55,31 @@ export interface Jurisdiction {
   type: 'federal' | 'state' | 'territory' | 'county' | 'municipality'
   abbreviation?: string
   parentId?: string
+}
+
+export interface SourceRegistryEntry {
+  id: string
+  officialUrl: string
+  publisher: string
+  retrievalMethod: 'manual' | 'api' | 'scrape' | 'certified-copy'
+  retrievedAt: string
+  checksum?: string
+  isOfficialSource: boolean
+  mirrorUrl?: string
+  curatorJustification?: string
+}
+
+export interface VersionSnapshot {
+  id: string
+  documentId: string
+  effectiveStart: string
+  effectiveEnd?: string
+  content: string
+  sourceRegistryId: string
+  checksum: string
+  createdAt: string
+  createdBy: string
+  notes?: string
 }
 
 export interface Document {
@@ -32,6 +94,14 @@ export interface Document {
   sourceUrl?: string
   lastChecked?: string
   description?: string
+  sourceRegistryIds?: string[]
+  currentVersionId?: string
+  retrievalMetadata?: {
+    retrievedAt: string
+    sourceUrl: string
+    checksum: string
+    parsingMethod: string
+  }
 }
 
 export interface Section {
@@ -140,4 +210,118 @@ export interface CitationCollection {
   createdAt: string
   updatedAt: string
   isPublic: boolean
+}
+
+export interface CrossReference {
+  id: string
+  fromSectionId: string
+  toSectionId: string
+  relationshipType: 'supersedes' | 'implements' | 'references' | 'conflicts' | 'preempts'
+  notes?: string
+}
+
+export interface TopicTag {
+  id: string
+  name: string
+  category: 'constitutional' | 'legal-topic' | 'practice-area' | 'case-type' | 'jurisdiction' | 'custom'
+  description?: string
+  usageCount: number
+}
+
+export interface ExplanationArticle {
+  id: string
+  title: string
+  content: string
+  relatedSectionIds: string[]
+  citations: string[]
+  authorRole: UserRole
+  createdAt: string
+  updatedAt: string
+  reviewedBy?: string
+  isPublished: boolean
+}
+
+export interface ProvenancePanel {
+  sourceRegistryEntry: SourceRegistryEntry
+  versionSnapshot?: VersionSnapshot
+  retrievalMetadata: {
+    retrievedAt: string
+    sourceUrl: string
+    checksum: string
+    parsingMethod: string
+  }
+  verificationChain: {
+    verifiedBy: string
+    verifiedAt: string
+    method: string
+    notes: string
+  }[]
+}
+
+export interface UpdateStrategy {
+  documentId: string
+  refreshSchedule: string
+  lastSuccessfulRefresh: string
+  lastAttemptedRefresh: string
+  failureCount: number
+  isStale: boolean
+  staleWarningThreshold: number
+}
+
+export interface CompareView {
+  leftSection: Section
+  rightSection: Section
+  similarities: string[]
+  differences: string[]
+  neutralSummary: string
+  disclaimerText: string
+}
+
+export interface TreatyMetadata {
+  id: string
+  documentId: string
+  ratificationDate?: string
+  status: 'pending' | 'ratified' | 'terminated' | 'suspended'
+  implementingLegislation?: string[]
+  signatories: string[]
+  reservations?: string
+}
+
+export interface SmartTagSuggestion {
+  tagName: string
+  confidence: 'high' | 'medium' | 'low'
+  reason: string
+  category: TopicTag['category']
+  autoApplied: boolean
+}
+
+export interface BatchAnalysisJob {
+  id: string
+  citationIds: string[]
+  startedAt: string
+  completedAt?: string
+  status: 'pending' | 'running' | 'paused' | 'completed' | 'failed'
+  progress: {
+    total: number
+    completed: number
+    failed: number
+    skipped: number
+  }
+  results: BatchAnalysisResult[]
+  options: {
+    autoApplyHighConfidence: boolean
+    skipThreshold: number
+    analysisMode: 'deep' | 'quick'
+  }
+}
+
+export interface BatchAnalysisResult {
+  citationId: string
+  status: 'analyzing' | 'completed' | 'failed' | 'skipped'
+  suggestions: SmartTagSuggestion[]
+  error?: string
+  processingTime: number
+  legalConcepts: string[]
+  practiceAreas: string[]
+  constitutionalIssues: string[]
 }

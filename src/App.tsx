@@ -4,8 +4,12 @@ import { Toaster } from '@/components/ui/sonner'
 import { Header } from '@/components/header'
 import { MobileNav, TabId } from '@/components/mobile-nav'
 import { HomeView } from '@/components/views/home-view'
+import { SupremeLawView } from '@/components/views/supreme-law-view'
+import { MyJurisdictionView } from '@/components/views/my-jurisdiction-view'
+import { LocalOverlayView } from '@/components/views/local-overlay-view'
 import { LibraryView } from '@/components/views/library-view'
 import { SearchView } from '@/components/views/search-view'
+import { TreatiesView } from '@/components/views/treaties-view'
 import { AnalyzerView } from '@/components/views/analyzer-view'
 import { LearnView } from '@/components/views/learn-view'
 import { CitationLibraryView } from '@/components/views/citation-library-view'
@@ -207,19 +211,42 @@ function App() {
             selectedJurisdiction={selectedJurisdiction}
             recentBookmarks={bookmarks || []}
             onSearch={handleSearch}
-            onNavigateToLibrary={() => setActiveTab('library')}
+            onNavigateToLibrary={() => setActiveTab('supreme-law')}
             onNavigateToAnalyzer={() => setActiveTab('analyzer')}
             onNavigateToBookmark={handleNavigateToBookmark}
             onNavigateToCitations={() => setActiveTab('citations')}
           />
         )}
 
-        {activeTab === 'library' && (
-          <LibraryView
+        {activeTab === 'supreme-law' && (
+          <SupremeLawView
             documents={documents}
             sections={sections}
-            selectedJurisdictionId={settings?.selectedJurisdictionId}
-            onDocumentSelect={(id) => console.log('Document selected:', id)}
+            onSectionSelect={handleSectionSelect}
+            onNavigateToTreaties={() => setActiveTab('treaties')}
+          />
+        )}
+
+        {activeTab === 'my-jurisdiction' && (
+          <MyJurisdictionView
+            jurisdiction={selectedJurisdiction}
+            documents={documents}
+            sections={sections}
+            onSectionSelect={handleSectionSelect}
+            onChangeJurisdiction={() => setShowSettings(true)}
+          />
+        )}
+
+        {activeTab === 'local' && (
+          <LocalOverlayView
+            jurisdiction={selectedJurisdiction}
+          />
+        )}
+
+        {activeTab === 'treaties' && (
+          <TreatiesView
+            documents={documents}
+            sections={sections}
             onSectionSelect={handleSectionSelect}
           />
         )}
@@ -254,10 +281,6 @@ function App() {
             sections={sections}
             onSectionSelect={handleSectionSelect}
           />
-        )}
-
-        {activeTab === 'contribute' && (
-          <LocalOrdinanceSubmission />
         )}
       </main>
 

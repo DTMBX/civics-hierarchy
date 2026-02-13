@@ -1,7 +1,7 @@
-import { House, Books, MagnifyingGlass, ChartBar, GraduationCap, Upload, BookmarkSimple } from '@phosphor-icons/react'
+import { House, Scales, MapPin, Buildings, MagnifyingGlass, GlobeHemisphereWest, ChartBar, GraduationCap, BookmarkSimple } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
-export type TabId = 'home' | 'library' | 'search' | 'analyzer' | 'learn' | 'contribute' | 'citations'
+export type TabId = 'home' | 'supreme-law' | 'my-jurisdiction' | 'local' | 'search' | 'treaties' | 'analyzer' | 'learn' | 'citations'
 
 interface MobileNavProps {
   activeTab: TabId
@@ -11,10 +11,10 @@ interface MobileNavProps {
 export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
   const tabs = [
     { id: 'home' as TabId, label: 'Home', icon: House },
-    { id: 'library' as TabId, label: 'Library', icon: Books },
-    { id: 'citations' as TabId, label: 'Citations', icon: BookmarkSimple },
-    { id: 'analyzer' as TabId, label: 'Analyzer', icon: ChartBar },
-    { id: 'learn' as TabId, label: 'Learn', icon: GraduationCap },
+    { id: 'supreme-law' as TabId, label: 'Supreme', icon: Scales },
+    { id: 'my-jurisdiction' as TabId, label: 'My State', icon: MapPin },
+    { id: 'search' as TabId, label: 'Search', icon: MagnifyingGlass },
+    { id: 'analyzer' as TabId, label: 'Analyze', icon: ChartBar },
   ]
 
   return (
@@ -34,7 +34,7 @@ export function MobileNav({ activeTab, onTabChange }: MobileNavProps) {
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              <Icon size={24} weight={isActive ? 'fill' : 'regular'} />
+              <Icon size={20} weight={isActive ? 'fill' : 'regular'} />
               <span className="text-xs font-medium">{tab.label}</span>
             </button>
           )

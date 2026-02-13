@@ -1,6 +1,6 @@
 # Planning Guide
 
-A cross-platform civics-and-law reference application that empowers everyday citizens, advocates, journalists, and civic workers to understand the hierarchy of U.S. law through accurate, cited primary sources and neutral educational frameworks—promoting informed, lawful civic engagement and due process.
+A court-defensible, citation-first "Hierarchy of Law" reference platform that delivers simple clarity for ordinary residents while maintaining precision sufficient for legal professionals—every claim traceable to official primary sources with full versioning, provenance tracking, and immutable audit trails.
 
 **Experience Qualities**:
 1. **Trustworthy**: Every legal claim is backed by verifiable citations to primary sources with clear separation between authoritative text, neutral explanation, and commentary
