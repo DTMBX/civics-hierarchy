@@ -1,0 +1,23 @@
+{
+  "_manifest": "evident-repo",
+  "_version": 1,
+  "name": "Civics Hierarchy",
+  "description": "Constitutional law reference — government jurisdiction hierarchy mapping and analysis.",
+  "role": "product-satellite",
+  "family": "Evident",
+  "business": "Evident Technologies LLC",
+  "stack": "React + TypeScript + Vite + D3",
+  "outputType": "static-site",
+  "exportTargets": ["GitHub Pages"],
+  "siteUrl": null,
+  "githubUrl": "https://github.com/DTMBX/civics-hierarchy",
+  "brand": "evident",
+  "packagingStatus": "standalone",
+  "releaseStatus": "experimental",
+  "sharedStandardsVersion": "1.0",
+  "tools": [],
+  "owner": "Devon Tyler",
+  "satelliteTier": "product",
+  "catalogVisibility": "listed",
+  "tokenFamily": "evident"
+}
