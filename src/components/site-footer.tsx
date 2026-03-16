@@ -97,6 +97,10 @@ export function SiteFooter({ userId }: SiteFooterProps) {
               </span>
             </div>
           </div>
+
+          <div className="mt-3 text-center text-[10px] text-muted-foreground/60">
+            Built under <a href="https://xtx396.com/governance" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-primary/70 transition-colors">Evident</a> governance standards.
+          </div>
         </div>
       </footer>
 

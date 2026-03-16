@@ -8,7 +8,7 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Custom domain (civics.evident.icu) serves from root
+  // Custom domain (civics.xtx396.com) serves from root
   base: '/',
   plugins: [
     react(),

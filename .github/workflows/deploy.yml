@@ -34,10 +34,35 @@ jobs:
       - name: Install dependencies
         run: npm ci --force
 
+      - name: Pre-build validation
+        run: |
+          echo "--- CNAME check ---"
+          if [ ! -f CNAME ] && [ ! -f public/CNAME ]; then
+            echo "::error::CNAME file missing"; exit 1
+          fi
+          echo "--- robots.txt check ---"
+          if [ ! -f robots.txt ] && [ ! -f public/robots.txt ]; then
+            echo "::warning::robots.txt missing (SEO impact)"
+          fi
+          echo "--- package.json name check ---"
+          PKG_NAME=$(node -p "require('./package.json').name")
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          if [ "$PKG_NAME" != "$REPO_NAME" ]; then
+            echo "::warning::package.json name '$PKG_NAME' != repo name '$REPO_NAME'"
+          fi
+          echo "Validation passed"
+
       - name: Build
         run: npm run build
         env:
           NODE_ENV: production
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
+            echo "::error::Build output missing dist/index.html"; exit 1
+          fi
+          echo "Build verified: $(ls dist/ | wc -l) files in dist/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
