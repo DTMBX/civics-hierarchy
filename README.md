@@ -1,23 +1,61 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# Civics Hierarchy
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+A citation-first educational reference platform for understanding American law
+across all authority levels. Constitutional and statutory law made accessible to
+ordinary citizens while maintaining precision sufficient for legal professionals.
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+**Live:** [civics.xtx396.com](https://civics.xtx396.com)
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+## Purpose
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+Civics Hierarchy organizes primary-source legal documents into a navigable
+hierarchy — federal, state, and local — so users can trace the chain of
+authority from the U.S. Constitution down to municipal ordinances, without vendor
+paywalls or editorial interpretation.
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+## Key Features
 
-📄 License For Spark Template Resources 
+- **Jurisdiction selector** — build a custom legal hierarchy (federal + state +
+  optional local)
+- **Constitutional library** — full text of U.S. and all 50 state constitutions
+- **Full-text search** — cross-source search filtered by authority level,
+  jurisdiction, type, and date
+- **Hierarchy learning module** — interactive education on supremacy, preemption,
+  incorporation, and separation of powers
+- **Conflict/preemption analyzer** — guided questionnaire generating
+  issue-spotting reports with citations
+- **Citation export** — Bluebook, ALWD, APA, MLA, Chicago, BibTeX, and court
+  filing formats
+- **Admin observability** — health checks, audit logging, SBOM, and ledger
+  verification
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+## Tech Stack
+
+- React 18 + TypeScript
+- Vite (SWC)
+- Tailwind CSS
+- Radix UI primitives
+- TanStack Query
+- GitHub Spark runtime
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+The dev server starts at `http://localhost:5173`.
+
+## Documentation
+
+- [PRD.md](PRD.md) — full product specification
+- [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidelines
+- [GOVERNANCE.md](GOVERNANCE.md) — authority model
+- [COMPLIANCE.md](COMPLIANCE.md) — regulatory compliance
+- [SECURITY.md](SECURITY.md) — security policy
+
+## License
+
+MIT — Evident Technologies LLC
+
