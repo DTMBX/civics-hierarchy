@@ -37,3 +37,9 @@ pids
 spark.meta.json
 .spark-initial-sha
 runtime.config.json
+
+# Playwright
+e2e-results/
+e2e-report/
+test-results/
+playwright-report/
