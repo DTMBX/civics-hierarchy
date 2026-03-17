@@ -9,7 +9,25 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { useTheme } from 'next-themes'
+import { useSyncExternalStore, useCallback } from 'react'
+
+function getIsDark() {
+  if (typeof document === 'undefined') return false
+  return document.documentElement.classList.contains('dark')
+}
+
+function subscribeDark(cb: () => void) {
+  const obs = new MutationObserver(cb)
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  return () => obs.disconnect()
+}
+
+function toggleDarkMode() {
+  const html = document.documentElement
+  const next = html.classList.contains('dark') ? 'light' : 'dark'
+  html.classList.toggle('dark', next === 'dark')
+  localStorage.setItem('theme', next)
+}
 
 interface HeaderProps {
   selectedJurisdiction?: Jurisdiction
@@ -34,7 +52,7 @@ export function Header({
     j => j.type === 'state' || j.type === 'territory'
   )
 
-  const { theme, setTheme } = useTheme()
+  const isDark = useSyncExternalStore(subscribeDark, getIsDark, () => false)
 
   const desktopNavItems: { id: RouteId; label: string; icon: typeof MagnifyingGlass }[] = [
     { id: 'search', label: 'Search', icon: MagnifyingGlass },
@@ -119,7 +137,7 @@ export function Header({
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-primary-foreground/70 hover:text-accent hover:bg-white/10"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => toggleDarkMode()}
             aria-label="Toggle dark mode"
           >
             <Sun size={18} className="block dark:hidden" />

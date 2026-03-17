@@ -16,7 +16,9 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(projectRoot, 'src')
+      '@': resolve(projectRoot, 'src'),
+      '@github/spark/hooks': resolve(projectRoot, 'src/lib/local-storage-kv.ts'),
+      '@github/spark/spark': resolve(projectRoot, 'src/lib/local-storage-kv.ts'),
     }
   },
 });

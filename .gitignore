@@ -32,3 +32,8 @@ pids
 .devcontainer/
 
 .spark-workbench-id
+
+# Spark artifacts (legacy)
+spark.meta.json
+.spark-initial-sha
+runtime.config.json
